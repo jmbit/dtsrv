@@ -1,0 +1,30 @@
+package web
+
+import "fmt"
+
+
+templ Index() {
+  @Base("dtsrv") {
+    <h1>Hi</h1>
+    <div hx-target="this" hx-swap="outerHTML">
+    <button hx-post="/start">Start</button>
+    </div>
+  }
+}
+
+templ Start(uuid string) {
+<div hx-trigger="done" hx-get={ fmt.Sprintf("/start/%s", uuid) } hx-swap="outerHTML" hx-target="this">
+  <h3>Starting Container</h3>
+  @StartSpinner(uuid)
+</div>
+}
+
+templ StartSpinner(uuid string) {
+ <div
+    hx-get={fmt.Sprintf("/ct/%s/status", uuid)}
+    hx-trigger="every 1200ms"
+    hx-target="this"
+    hx-swap="innerHTML">
+    <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+  </div>
+}

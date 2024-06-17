@@ -1,12 +1,14 @@
 package web
 
-templ Base() {
+templ Base(title string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="utf-8"/>
-			<title>Go Blueprint Hello</title>
+			<title>Title</title>
 			<script src="assets/js/htmx.min.js"></script>
+      <link rel="stylesheet" href="/assets/css/simple.min.css"/>
+      <link rel="stylesheet" href="/assets/css/loading.css"/>
 		</head>
 		<body>
 			<main>

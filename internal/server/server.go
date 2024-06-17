@@ -1,29 +1,31 @@
 package server
 
 import (
+	"dtsrv/internal/middlewares"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
+	"time"    
+  "github.com/gorilla/handlers"
+
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type Server struct {
-	port int
-}
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
-	}
+
+  middlewareStack := middlewares.CreateStack(
+    middlewares.GorillaLogging,
+    handlers.RecoveryHandler(),
+    )
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Addr:         fmt.Sprintf(":%d", port),
+		Handler:      middlewareStack(registerRoutes()),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
