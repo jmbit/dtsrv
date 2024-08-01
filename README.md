@@ -2,6 +2,17 @@
 
 Attempt to create a terminal server style application for Docker containers, mainly intended to be used with the webtop-Containers by linuxserver.io, but should be usable with anything that listens on a HTTP endpoint.
 
+## Getting Started
+To get up and running with a (development) install of dtsrv, you need go, templ, air and docker installed on the system.
+you also need to create a `.env` file in the project directory like this:
+
+```env
+PORT=8080
+APP_ENV=local
+SESSION_KEY=randomkey
+IMAGE_NAME=nameofdockerimage
+```
+
 ## MakeFile
 
 run all make commands with clean tests
