@@ -45,7 +45,7 @@ live reload the application
 make watch
 ```
 
-run the test suite
+run the test suite (as soon as it actually exists)
 ```bash
 make test
 ```
