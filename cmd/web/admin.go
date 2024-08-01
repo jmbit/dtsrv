@@ -16,14 +16,29 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
       return
     }
  
-    switch r.URL.Query().Get("action") {
-    case "stop":
+    if r.URL.Query().Get("action") == "stop" {
       err := containers.StopContainer(ctName)
       if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
+        log.Println("Error stopping container", ctName, err)
         return
       }
-    case "delete":
+
+      ctInfo, err := containers.GetContainer(ctName)
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+          log.Println("Error deleting container", ctName, err)
+        return
+      } 
+      component := containerRow(ctInfo)
+      err = component.Render(r.Context(), w)
+      if err != nil {
+      	http.Error(w, err.Error(), http.StatusBadRequest)
+      	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+        return
+      }
+      return
+    } else if r.URL.Query().Get("action") == "delete" {
       err := containers.DeleteContainer(ctName)
       if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -32,19 +47,6 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusOK)
         return
       }
-    } 
-
-    ctInfo, err := containers.GetContainer(ctName)
-    if err != nil {
-      http.Error(w, err.Error(), http.StatusInternalServerError)
-      return
-    } 
-    component := containerRow(ctInfo)
-    err = component.Render(r.Context(), w)
-    if err != nil {
-    	http.Error(w, err.Error(), http.StatusBadRequest)
-    	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
-      return
     }
   }
 

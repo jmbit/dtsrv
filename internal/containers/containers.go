@@ -48,7 +48,6 @@ func PullContainer() error {
 
 func ListContainers() ([]types.Container, error) {
   var returnList []types.Container
-  log.Println("Listing previously created containers")
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -91,6 +90,7 @@ func GetContainer(ctName string) (types.Container, error) {
       return ct, nil
     }
   }
+  log.Println("Could not find container", ctName)
   return types.Container{}, fmt.Errorf("Could not find container %s", ctName)
 }
 
@@ -106,6 +106,7 @@ func StopContainer(ctName string) error {
     log.Println("Error stopping container, ", err)
     return err
 	}
+  log.Println("Stopped Container", ctName)
   return nil
 }
 
@@ -126,6 +127,7 @@ func DeleteContainer(ctName string) error {
     log.Println("Error removing container, ", err)
     return err
   }
+  log.Println("Deleted Container", ctName)
   return nil
 }
 
