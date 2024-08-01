@@ -27,6 +27,7 @@ func GetContainerUrl(ctName string) (string, error) {
     port = key.Int()
     break
   }
-  return fmt.Sprintf("http:%s:%d", ctIP, port, ctName), nil
-
+  return fmt.Sprintf("http://%s:%d", ctIP, port), nil
 }
+
+

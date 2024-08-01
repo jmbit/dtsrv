@@ -1,0 +1,62 @@
+package web
+
+import (
+	"github.com/docker/docker/api/types"
+  "fmt"
+  "strings"
+)
+
+templ Admin(imageName string, cts []types.Container) {
+  @Base("Admin") {
+    <p>Using Docker image {imageName}</p>
+
+    <div>
+    <h2>Containers</h2>
+    <table>
+      <thead>
+        <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Status</th>
+        <th>Stop</th>
+        </tr>
+      </thead>
+      <tbody>
+        for _, ct := range cts {
+          @containerRow(ct)
+          }
+
+      </tbody>
+      </table>
+    </div>
+  }
+}
+
+templ containerRow(ct types.Container) {
+  <tr>
+    <td>
+      <a href={templ.URL(fmt.Sprintf("/view%s/", ct.Names[0]))}>
+      {strings.TrimPrefix(ct.Names[0], "/")}
+      </a>
+    </td>
+    <td>{ct.Image}</td>
+    <td>{ct.State}</td>
+    <td>
+      if ct.State == "running" {
+        <button 
+        hx-get={fmt.Sprintf("/admin?ctName=%s&action=stop", strings.TrimPrefix(ct.Names[0], "/"))}
+        hx-swap="outerHTML"
+        hx-target="closest tr"
+        >
+          STOP</button>
+      } else {
+        <button 
+        hx-get={fmt.Sprintf("/admin?ctName=%s&action=delete", strings.TrimPrefix(ct.Names[0], "/"))}
+        hx-swap="outerHTML"
+        hx-target="closest tr"
+        >
+          DELETE</button>
+      }
+    </td>
+  </tr>
+}

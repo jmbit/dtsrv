@@ -37,7 +37,7 @@ func TestConnectionToContainer(ctid string) (bool, error) {
   }
   resp, err := http.Get(fmt.Sprintf("http://%s:%d", ctIP, port))
   log.Println("Code", resp.Status, err)
-    if resp.StatusCode == 200 {
+  if resp.StatusCode == 200 {
       return true, nil
   }
   if timeoutCounter > maxTimeout {

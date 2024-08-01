@@ -6,63 +6,18 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
-	"github.com/google/uuid"
+	_ "github.com/joho/godotenv/autoload"
 )
 
-// CreateContainer() wraps creatContainer asyncronously to avoid UI lag
-func CreateContainer() string {
-  ctName := fmt.Sprintf("dtsrv-%s", uuid.New().String())
-  go createContainer(ctName)
-  return ctName
-}
-
-
-func createContainer(ctName string) {
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-    log.Println("Error creating container,", err)
-    return
-	}
-	defer cli.Close()
-
-	imageName := "lscr.io/linuxserver/webtop"
-
-	out, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
-	if err != nil {
-    log.Println("Error creating container,", err)
-    return
-	}
-	defer out.Close()
-
-	resp, err := cli.ContainerCreate(ctx, &container.Config{
-    // Env: []string{
-    //   fmt.Sprintf("SUBFOLDER=/ct/%s/", ctName),
-    // },
-		Image: imageName,
-	}, nil, nil, nil, ctName)
-  	if err != nil {
-    log.Println("Error creating container,", err)
-    return
-	}
-
-	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
-    log.Println("Error creating container,", err)
-    return
-	}
-
-	fmt.Println(ctName, resp.ID)
-
-
-}
-
 func PullContainer() error {
-  log.Println("pullling container image")
+  log.Println("pulling container image")
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -71,7 +26,13 @@ func PullContainer() error {
 	}
 	defer cli.Close()
 
-	imageName := "lscr.io/linuxserver/webtop"
+  var imageName string
+  if envImage, exists := os.LookupEnv("IMAGE_NAME"); exists == true {
+    imageName = envImage
+  } else {
+
+	imageName = "lscr.io/linuxserver/webtop"
+  }
 
 	out, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
 	if err != nil {
@@ -85,20 +46,100 @@ func PullContainer() error {
   return nil
 }
 
-func CleanupContainers() {
-  log.Println("Deleting previously created containers")
+func ListContainers() ([]types.Container, error) {
+  var returnList []types.Container
+  log.Println("Listing previously created containers")
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-    log.Println("Error creating container,", err)
-    return
+    log.Println("Error creating container client,", err)
+    return nil, err
 	}
 	defer cli.Close()
 
-  cli.ContainerList(ctx, container.ListOptions{
+  // No idea how the filters work, they aren't really documented, so rip me
+  // This is going to suck hard if you have hundreds of containers
+  list, err := cli.ContainerList(ctx, container.ListOptions{
     All: true,
     Filters: filters.Args{},
+  })
 
-})
+	if err != nil {
+    log.Println("Error listing containers,", err)
+    return nil, err
+	}
 
+  for _, ct := range list {
+    if strings.HasPrefix(ct.Names[0], "/dtsrv-") {
+      returnList = append(returnList, ct)
+
+    }
+  }
+
+  return returnList, nil
+}
+
+//GetContainer() wraps ListContainers with a filter for the container name, because for reasons ContainerList and ContainerInspect
+// give different types representing the same thing
+func GetContainer(ctName string) (types.Container, error) {
+  containerList, err := ListContainers()
+  if err != nil {
+    return types.Container{}, err
+  }
+  for _, ct := range containerList {
+    if ct.Names[0] == fmt.Sprintf("/%s", ctName) {
+      return ct, nil
+    }
+  }
+  return types.Container{}, fmt.Errorf("Could not find container %s", ctName)
+}
+
+func StopContainer(ctName string) error {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+    log.Println("Error creating container client,", err)
+    return err
+	}
+  err = cli.ContainerStop(ctx, ctName, container.StopOptions{})
+	if err != nil {
+    log.Println("Error stopping container, ", err)
+    return err
+	}
+  return nil
+}
+
+func DeleteContainer(ctName string) error {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+    log.Println("Error creating container client,", err)
+    return err
+	}
+  err = cli.ContainerStop(ctx, ctName, container.StopOptions{})
+	if err != nil {
+    log.Println("Error stopping container, ", err)
+    return err
+	}
+  err = cli.ContainerRemove(ctx, ctName, container.RemoveOptions{})
+  if err != nil {
+    log.Println("Error removing container, ", err)
+    return err
+  }
+  return nil
+}
+
+
+//containerNameToDockerID() looks up the Docker container ID from its name (idk why the API has no relevant info)
+func containerNameToDockerID(ctName string) (string, error) {
+  ctList, err := ListContainers()
+  if err != nil {
+    return "", err
+  }
+  for _, ct := range ctList {
+    if ct.Names[0] == fmt.Sprintf("/%s", ctName) {
+      return ct.ID, nil
+    }
+  }
+  return "", nil
 }
