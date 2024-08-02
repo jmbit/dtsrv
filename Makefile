@@ -45,15 +45,15 @@ watch:
 	fi
 
 install:
-	install -d /usr/local/bin
-	useradd -r -d /var/local/lib/dtsrv dtsrv
-	install -m 755 dtsrv /usr/local/bin/
-	install -d -o root -g root /etc/default
-	install -d -o root -g root example.env /etc/default/dtsrv
-	install -d -o root -g root dtsrv.service /etc/systemd/system/dtsrv.service;
+	@install -d /usr/local/bin; \
+	useradd -r -d /var/local/lib/dtsrv dtsrv; \
+	install -m 755 dtsrv /usr/local/bin/; \
+	install -d -o root -g root /etc/default; \
+	install -d -o root -g root example.env /etc/default/dtsrv; \
+	install -d -o root -g root dtsrv.service /etc/systemd/system/dtsrv.service; \
 	chown dtsrv:dtsrv /var/local/lib/dtsrv; \
-  chmod 700 /var/local/lib/dtsrv;
-	usermod -aG docker dtsrv;
+  chmod 700 /var/local/lib/dtsrv; \
+	usermod -aG docker dtsrv; \
 
 	
 
