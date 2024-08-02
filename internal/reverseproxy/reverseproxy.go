@@ -12,6 +12,7 @@ import (
 )
 
 var containerProxies sync.Map
+var lastAccessed sync.Map
 
 func newProxy(rawUrl string) (*httputil.ReverseProxy, error) {
     url, err := url.Parse(rawUrl)

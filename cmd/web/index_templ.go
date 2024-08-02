@@ -31,7 +31,7 @@ func Index() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Hi</h1><div hx-target=\"this\" hx-swap=\"outerHTML\"><button hx-post=\"/start\">Start</button></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>dtsrv</h1><div hx-target=\"this\" hx-swap=\"outerHTML\"><button hx-post=\"/start\">Start new Session</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

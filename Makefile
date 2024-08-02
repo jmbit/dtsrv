@@ -6,11 +6,11 @@ all: build
 build:
 	@echo "Building..."
 	@templ generate
-	@go build -o main cmd/api/main.go
+	@go build -o main cmd/run/main.go
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@go run cmd/run/main.go
 
 # Test the application
 test:
