@@ -1,0 +1,16 @@
+[Unit]
+Description=Docker Terminal Server
+After=network.target
+
+[Service]
+Type=simple
+User=dtsrv
+Group=dtsrv
+WorkingDirectory=/var/local/lib/dtsrv
+ExecStart=/usr/local/bin/dtsrv
+EnvironmentFile=/etc/default/dtsrv
+Restart=on-failure
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
