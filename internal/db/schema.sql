@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS containersession (
 
 CREATE TABLE IF NOT EXISTS containertimeout (
   id INTEGER PRIMARY KEY,
-  created INTEGER --Creation timestamp in UNIX time
+  created INTEGER, --Creation timestamp in UNIX time
   last_accessed INTEGER --Last access timestamp in UNIX time
-)
+);

@@ -23,7 +23,7 @@ templ Admin(imageName string, cts []types.Container) {
       </thead>
       <tbody>
         for _, ct := range cts {
-          @containerRow(ct)
+          @adminContainerRow(ct)
           }
 
       </tbody>
@@ -32,7 +32,7 @@ templ Admin(imageName string, cts []types.Container) {
   }
 }
 
-templ containerRow(ct types.Container) {
+templ adminContainerRow(ct types.Container) {
   <tr>
     <td>
       <a href={templ.URL(fmt.Sprintf("/view%s/", ct.Names[0]))}>
@@ -60,3 +60,4 @@ templ containerRow(ct types.Container) {
     </td>
   </tr>
 }
+

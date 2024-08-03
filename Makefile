@@ -24,7 +24,7 @@ test:
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -f dtsrv
 	@rm -f cmd/web/*_templ.go
 
 # Live Reload

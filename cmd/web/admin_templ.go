@@ -62,7 +62,7 @@ func Admin(imageName string, cts []types.Container) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, ct := range cts {
-				templ_7745c5c3_Err = containerRow(ct).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = adminContainerRow(ct).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -81,7 +81,7 @@ func Admin(imageName string, cts []types.Container) templ.Component {
 	})
 }
 
-func containerRow(ct types.Container) templ.Component {
+func adminContainerRow(ct types.Container) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

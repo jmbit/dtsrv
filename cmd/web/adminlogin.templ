@@ -1,0 +1,14 @@
+package web
+
+templ AdminLogin() {
+  @Base("Admin Login") {
+    <h1>Admin Login</h1>
+    <form method="post" action="/admin">
+    <label> 
+    Password
+    <input type="password" placeholder="**********" name="password"></input>
+    </label>
+    <button type="submit">Login</button>
+    </form>
+  }
+}

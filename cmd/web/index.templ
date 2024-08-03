@@ -1,14 +1,41 @@
 package web
 
-import "fmt"
+import (
+	"github.com/docker/docker/api/types"
+  "fmt"
+  "strings"
+  )
 
 
-templ Index() {
-  @Base("dtsrv") {
+templ Index(cts []types.Container) {
+  @Base("Home") {
     <h1>dtsrv</h1>
     <div hx-target="this" hx-swap="outerHTML">
-    <button hx-post="/start">Start new Session</button>
+    <button hx-post="/start">Start new Container</button>
     </div>
+    if len(cts) > 0 {    
+    <div>
+    <h2>Existing Sessions</h2>
+    <table>
+      <thead>
+        <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Status</th>
+        <th>Stop</th>
+        </tr>
+      </thead>
+      <tbody>
+        for _, ct := range cts {
+          @indexContainerRow(ct)
+          }
+
+      </tbody>
+      </table>
+    </div>
+
+
+    }
   }
 }
 
@@ -27,4 +54,24 @@ templ StartSpinner(uuid string) {
     hx-swap="innerHTML">
     <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
   </div>
+}
+
+templ indexContainerRow(ct types.Container) {
+  <tr>
+    <td>
+      <a href={templ.URL(fmt.Sprintf("/view%s/", ct.Names[0]))}>
+      {strings.TrimPrefix(ct.Names[0], "/")}
+      </a>
+    </td>
+    <td>{ct.Image}</td>
+    <td>{ct.State}</td>
+    <td>
+        <button 
+        hx-get={fmt.Sprintf("/index?ctName=%s&action=stop", strings.TrimPrefix(ct.Names[0], "/"))}
+        hx-swap="outerHTML"
+        hx-target="closest tr"
+        >
+          END</button>
+    </td>
+  </tr>
 }

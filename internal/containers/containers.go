@@ -145,3 +145,15 @@ func containerNameToDockerID(ctName string) (string, error) {
   }
   return "", nil
 }
+
+func GetImageName()  string{
+    // Get default image
+  var imageName string
+  if envImage, exists := os.LookupEnv("IMAGE_NAME"); exists == true {
+    imageName = envImage
+  } else {
+	imageName = "lscr.io/linuxserver/webtop"
+  }
+
+  return imageName
+}
