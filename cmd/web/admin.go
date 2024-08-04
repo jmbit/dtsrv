@@ -12,48 +12,20 @@ import (
 
 func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 
-  // Run adminPermissionHandler and only continue if it doesn't throw any errors
   admin, err := isAdmin(w, r) 
   if err != nil {
     return 
   }
-  if r.Method == http.MethodPost {
-    sess, err := session.SessionStore.Get(r, "session")
-    if err != nil {
-      http.Error(w, err.Error(), http.StatusInternalServerError)
-      return
-    }
- 
-    err = r.ParseForm()
-      if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-      }
-    if r.PostFormValue("password") == os.Getenv("ADMIN_PW") {
-        sess.Values["admin"] = true
-        err := sess.Save(r, w)
-        if err != nil {
-          http.Error(w, err.Error(), http.StatusInternalServerError)
-          return
-        }
-        admin = true
-      }
-    }
-
-
   if admin == false {
-    component := AdminLogin()
-    err = component.Render(r.Context(), w)
-	  if err != nil {
-	  	http.Error(w, err.Error(), http.StatusBadRequest)
-	  	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+    authorized, err := adminLoginHandler(w, r)
+    if err != nil || authorized == false {
       return
-	  }
-    return
+    }
   }
+  
 
-  // Run adminQueryHandler and only continue if it doesn't throw any errors
-  if adminQueryHandler(w, r) != nil {
+  if r.URL.Query().Get("action") != "" {
+    adminQueryHandler(w, r)
     return
   }
 
@@ -73,8 +45,67 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool,error) {
+if r.Method == http.MethodPost {
+    sess, err := session.SessionStore.Get(r, "session")
+    if err != nil {
+      http.Error(w, err.Error(), http.StatusInternalServerError)
+      return false, err
+    }
+ 
+    err = r.ParseForm()
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return false, err
+      }
+    if r.PostFormValue("password") == os.Getenv("ADMIN_PW") {
+        sess.Values["admin"] = true
+        err := sess.Save(r, w)
+        if err != nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return false, err
+        }
+        return true, nil
+      }
+    } else {
+    component := AdminLogin()
+    err := component.Render(r.Context(), w)
+	  if err != nil {
+	  	http.Error(w, err.Error(), http.StatusBadRequest)
+	  	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+      return false, err
+	  }
+    return false, nil
+   }
+    component := AdminLogin()
+    err := component.Render(r.Context(), w)
+	  if err != nil {
+	  	http.Error(w, err.Error(), http.StatusBadRequest)
+	  	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+      return false, err
+	  }
+    return false, nil
+}
+
 func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
   if r.URL.Query().Get("action") != "" {
+    if r.URL.Query().Get("action") == "logout" {
+      sess, err := session.SessionStore.Get(r, "session")
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return err
+      }
+      sess.Values["admin"] = false
+      err = sess.Save(r, w)
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return err
+      }
+      http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
+
+      return nil
+    }
+
     ctName := r.URL.Query().Get("ctName")
     if ctName == "" {
 	  	http.Error(w, "No container specified", http.StatusBadRequest)
@@ -96,6 +127,7 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
         return err
       } 
       component := adminContainerRow(ctInfo)
+      ctInfo.State = "exited" 
       err = component.Render(r.Context(), w)
       if err != nil {
       	http.Error(w, err.Error(), http.StatusBadRequest)

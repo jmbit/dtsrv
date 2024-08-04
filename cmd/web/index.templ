@@ -27,7 +27,9 @@ templ Index(cts []types.Container) {
       </thead>
       <tbody>
         for _, ct := range cts {
-          @indexContainerRow(ct)
+            if ct.State == "running" {
+              @indexContainerRow(ct)
+            }
           }
 
       </tbody>

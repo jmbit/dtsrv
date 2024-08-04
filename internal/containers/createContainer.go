@@ -36,12 +36,6 @@ func createContainer(ctName string) error {
 	imageName = "lscr.io/linuxserver/webtop"
   }
 
-  err = PullContainer()
-	if err != nil {
-    log.Println("Error creating container,", err)
-    return err
-	}
-
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
     Env: []string{
       fmt.Sprintf("SUBFOLDER=/view/%s/", ctName),

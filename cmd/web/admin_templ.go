@@ -57,7 +57,7 @@ func Admin(imageName string, cts []types.Container) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><div><h2>Containers</h2><table><thead><tr><th>Name</th><th>Image</th><th>Status</th><th>Stop</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><a class=\"button\" href=\"/admin?action=logout\">Logout</a><div><h2>Containers</h2><table><thead><tr><th>Name</th><th>Image</th><th>Status</th><th>Stop</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

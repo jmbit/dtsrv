@@ -1,13 +1,11 @@
 package main
 
 import (
-	"dtsrv/internal/db"
+	"dtsrv/internal/containers"
 	"dtsrv/internal/server"
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/gorilla/securecookie"
 	_ "github.com/joho/godotenv/autoload"
@@ -21,17 +19,7 @@ func main() {
     os.Setenv("ADMIN_PW", pw)
     log.Printf("Set Admin PW to %s temporarily, please set a proper admin PW.\n", pw)
   }
-  //Gracefully handle SIGINT (ctrl+c)
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigChan
-		fmt.Println()
-		fmt.Printf("Received signal: %s\n", sig)
-    db.Close()
-		fmt.Println("Cleanup done. Exiting...")
-    os.Exit(0)
-	}()
+  containers.PullContainer()
 
 
 	server := server.NewServer()

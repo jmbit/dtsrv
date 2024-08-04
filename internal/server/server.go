@@ -18,6 +18,7 @@ func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
   middlewareStack := middlewares.CreateStack(
+    middlewares.AssetCaching,
     middlewares.GorillaLogging,
     handlers.RecoveryHandler(),
     )
