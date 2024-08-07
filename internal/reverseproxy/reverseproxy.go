@@ -45,14 +45,18 @@ func NewContainerProxy(ctName string, url string) (error) {
   return nil
 }
 
+func HandleUnauthorized(w http.ResponseWriter, r *http.Request) {
+      http.Error(w, "Unauthorized", http.StatusUnauthorized)
+}
+
 func HandleReverseProxy(w http.ResponseWriter, r *http.Request) {
-  log.Println(r.URL.String())
   ctName := r.PathValue("ctName")
   if (ctName == "" || !(strings.HasPrefix(ctName, "dtsrv"))) {
     log.Println("Container", ctName, "not found")
     http.Error(w, "Container not found", http.StatusNotFound)
     return
   }
+
   proxy, err := loadProxy(ctName)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
