@@ -19,7 +19,7 @@ func main() {
     os.Setenv("ADMIN_PW", pw)
     log.Printf("Set Admin PW to %s temporarily, please set a proper admin PW.\n", pw)
   }
-  containers.PullContainer()
+  go containers.PullContainer()
 
 
 	server := server.NewServer()

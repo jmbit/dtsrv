@@ -4,6 +4,7 @@ import (
 	"github.com/docker/docker/api/types"
   "fmt"
   "strings"
+	"time"
   )
 
 
@@ -21,6 +22,7 @@ templ Index(cts []types.Container) {
         <tr>
         <th>Name</th>
         <th>Image</th>
+        <th>Created</th>
         <th>Status</th>
         <th>Stop</th>
         </tr>
@@ -35,8 +37,6 @@ templ Index(cts []types.Container) {
       </tbody>
       </table>
     </div>
-
-
     }
   }
 }
@@ -66,6 +66,7 @@ templ indexContainerRow(ct types.Container) {
       </a>
     </td>
     <td>{ct.Image}</td>
+    <td>{time.Unix(ct.Created, 0).Format(time.RFC822)}</td>
     <td>{ct.State}</td>
     <td>
         <button 

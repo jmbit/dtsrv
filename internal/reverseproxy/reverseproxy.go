@@ -46,6 +46,7 @@ func NewContainerProxy(ctName string, url string) (error) {
 }
 
 func HandleReverseProxy(w http.ResponseWriter, r *http.Request) {
+  log.Println(r.URL.String())
   ctName := r.PathValue("ctName")
   if (ctName == "" || !(strings.HasPrefix(ctName, "dtsrv"))) {
     log.Println("Container", ctName, "not found")

@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/docker/docker/api/types"
   "fmt"
+  "time"
   "strings"
 )
 
@@ -17,6 +18,7 @@ templ Admin(imageName string, cts []types.Container) {
         <tr>
         <th>Name</th>
         <th>Image</th>
+        <th>Created</th>
         <th>Status</th>
         <th>Stop</th>
         </tr>
@@ -40,6 +42,7 @@ templ adminContainerRow(ct types.Container) {
       </a>
     </td>
     <td>{ct.Image}</td>
+    <td>{time.Unix(ct.Created, 0).Format(time.RFC822)}</td>
     <td>{ct.State}</td>
     <td>
       if ct.State == "running" {
