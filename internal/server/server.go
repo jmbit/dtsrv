@@ -6,22 +6,22 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"    
-  "github.com/gorilla/handlers"
+	"time"
 
+	"github.com/gorilla/handlers"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
-
+// NewServer() builds a http server with middlewares and config from env
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
-  middlewareStack := middlewares.CreateStack(
-    middlewares.AssetCaching,
-    middlewares.GorillaLogging,
-    handlers.RecoveryHandler(),
-    )
+	middlewareStack := middlewares.CreateStack(
+		middlewares.AssetCaching,
+		middlewares.GorillaLogging,
+		handlers.RecoveryHandler(),
+	)
 
 	// Declare Server config
 	server := &http.Server{

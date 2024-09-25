@@ -1,66 +1,55 @@
 package containers
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"sync"
-
-	"github.com/docker/docker/client"
 )
 
+// map keeping track of timeouts
 var containerTimeouts sync.Map
+
+// max retry count (should probably be an env variable)
 var maxTimeout = 30
 
 // testConnectionToContainer() takes the Id of a container and checks if it's reachable on Port 3000
 func TestConnectionToContainer(ctName string) (bool, error) {
-  ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	timeoutCounter := getTimeoutCount(ctName)
+	cturl, err := GetContainerUrl(ctName)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
-	defer cli.Close()
-  container, err := cli.ContainerInspect(ctx, ctName)
-  if err != nil {
-    return false, err
-  }
-  timeoutCounter := getTimeoutCount(ctName)
-  ctIP := container.NetworkSettings.IPAddress
-  ctPorts := container.NetworkSettings.Ports
-  // Hack to get the first port from the map. 
-  var port int
-  for key := range(ctPorts) {
-    port = key.Int()
-    break
-  }
-  log.Printf("Trying to connect to %s:%v", ctIP, port)
-  resp, err := http.Get(fmt.Sprintf("http://%s:%d", ctIP, port))
-  log.Println("Code", resp.Status, err)
-  if resp.StatusCode == 200 {
-      return true, nil
-  }
-  log.Printf("Trying to connect to http://%s:%d/view/%s/", ctIP, port, ctName)
-  resp, err = http.Get(fmt.Sprintf("http://%s:%d/view/%s/", ctIP, port, ctName))
-  log.Println("Code", resp.Status, err)
-  if resp.StatusCode == 200 {
-      return true, nil
-  }
-  if timeoutCounter > maxTimeout {
-    return false, fmt.Errorf("Could not connect to %s on IP %s", ctName, ctIP)
-  }
-  return false, nil
+
+	log.Printf("Trying to connect to %s", cturl)
+	resp, err := http.Get(cturl)
+	log.Println("Code", resp.Status, err)
+	if resp.StatusCode == 200 {
+		return true, nil
+	}
+	log.Printf("Trying to connect to http://%s/view/%s/", cturl, ctName)
+	resp, err = http.Get(fmt.Sprintf("http://%s/view/%s/", cturl, ctName))
+	log.Println("Code", resp.Status, err)
+	if resp.StatusCode == 200 {
+		containerTimeouts.Delete(ctName)
+		return true, nil
+	}
+	if timeoutCounter > maxTimeout {
+		containerTimeouts.Delete(ctName)
+		return false, fmt.Errorf("Could not connect to %s on ", ctName, cturl)
+	}
+	return false, nil
 
 }
 
+// getTimeoutCount() retrieves the timeout from the map
 func getTimeoutCount(ctName string) int {
-  counter, ok := containerTimeouts.Load(ctName)
-  if !ok {
-    containerTimeouts.Store(ctName, 0)
-    return 0
-  } else {
-    return counter.(int)
-  }
+	counter, ok := containerTimeouts.Load(ctName)
+	if !ok {
+		containerTimeouts.Store(ctName, 0)
+		return 0
+	} else {
+		return counter.(int)
+	}
 
 }
-

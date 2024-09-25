@@ -11,153 +11,153 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
+// IndexWebHandler() is the main http handler for the application
 func IndexWebHandler(w http.ResponseWriter, r *http.Request) {
-  sess, err := session.SessionStore.Get(r, "session")
-  if err != nil {
+	sess, err := session.SessionStore.Get(r, "session")
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  err = indexQueryHandler(w, r)
-  if err != nil {
-    return
-  }
+		return
+	}
+	err = indexQueryHandler(w, r)
+	if err != nil {
+		return
+	}
 
-  containerNameList, err := session.GetContainers(sess)
-  if err != nil {
+	// Info for Table of containers
+	containerNameList, err := session.GetContainers(sess)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  log.Println(containerNameList)
-  containerRawList, err := containers.ListContainers()
-  if err != nil {
+		return
+	}
+	log.Println(containerNameList)
+	containerRawList, err := containers.ListContainers()
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  containerList := []types.Container{}
-  for _, container := range containerRawList {
-    for _, containerName := range containerNameList {
-      if container.Names[0] == fmt.Sprintf("/%s", containerName) {
-        containerList = append(containerList, container)
-      }
-    }
-  }
+		return
+	}
+	containerList := []types.Container{}
+	for _, container := range containerRawList {
+		for _, containerName := range containerNameList {
+			if container.Names[0] == fmt.Sprintf("/%s", containerName) {
+				containerList = append(containerList, container)
+			}
+		}
+	}
 
 	component := Index(containerList)
-  err = component.Render(r.Context(), w)
+	err = component.Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Fatalf("Error rendering in IndexWebHandler: %e", err)
 	}
 }
 
+// StartWebHandler() starts a container
 func StartWebHandler(w http.ResponseWriter, r *http.Request) {
-  sess, err := session.SessionStore.Get(r, "session")
-  if err != nil {
+	sess, err := session.SessionStore.Get(r, "session")
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  ctName, err := containers.CreateContainer()
-  if err != nil {
+		return
+	}
+	ctName, err := containers.CreateContainer()
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  err = session.AppendContainer(sess, ctName)
-  if err != nil {
+		return
+	}
+	err = session.AppendContainer(sess, ctName)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  err = sess.Save(r, w)
-  if err != nil {
+		return
+	}
+	err = sess.Save(r, w)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
-  }
-  ctUrl, err := containers.GetContainerUrl(ctName)
-  if err != nil {
-    log.Println("Error parsing container url,", err)
+		return
+	}
+	ctUrl, err := containers.GetContainerUrl(ctName)
+	if err != nil {
+		log.Println("Error parsing container url,", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
-  }
-  go reverseproxy.NewContainerProxy(ctName, ctUrl)
+	}
+	go reverseproxy.NewContainerProxy(ctName, ctUrl)
 
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	component := Start(ctName)
-  err = component.Render(r.Context(), w)
+	err = component.Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Fatalf("Error rendering in IndexWebHandler: %e", err)
 	}
 }
 
+// StartStatusWebHandler() is called pereodically after starting a container
 func StartStatusWebHandler(w http.ResponseWriter, r *http.Request) {
-  ctName := r.PathValue("ctName")
-  component := StartSpinner(ctName)
-  running, err := containers.TestConnectionToContainer(ctName)
-  if running == true {
-    w.Header().Add("HX-Redirect", fmt.Sprintf("/view/%s/", ctName))
-  }
-  if err != nil {
-    log.Println(err)
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  err = component.Render(r.Context(), w)
+	ctName := r.PathValue("ctName")
+	component := StartSpinner(ctName)
+	running, err := containers.TestConnectionToContainer(ctName)
+	if running == true {
+		w.Header().Add("HX-Redirect", fmt.Sprintf("/view/%s/", ctName))
+	}
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	err = component.Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Fatalf("Error rendering in IndexWebHandler: %e", err)
 	}
 }
 
-
-
+// indexQueryHandler() handles/works on any url parameters specified
 func indexQueryHandler(w http.ResponseWriter, r *http.Request) error {
-  sess, err := session.SessionStore.Get(r, "session")
-  if err != nil {
+	sess, err := session.SessionStore.Get(r, "session")
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return err
-  }
+		return err
+	}
 
-  if r.URL.Query().Get("action") != "" {
-    ctName := r.URL.Query().Get("ctName")
-    if ctName == "" {
-	  	http.Error(w, "No container specified", http.StatusBadRequest)
-      return fmt.Errorf("No container specified")
-    }
-    if ok, err := session.OwnsContainer(sess, ctName); ok == false {
-      if err == nil {
-        err = fmt.Errorf("Container not owned by this session")
-      }
-	  	http.Error(w, err.Error(), http.StatusBadRequest)
-      return err
-    }
- 
-    if r.URL.Query().Get("action") == "stop" {
-      err := containers.StopContainer(ctName)
-      if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        log.Println("Error stopping container", ctName, err)
-        return err
-      }
-      session.RemoveContainer(sess, ctName)
-      if err != nil {
-    		http.Error(w, err.Error(), http.StatusInternalServerError)
-        return err
-      }
+	// This can likely be cleaned up and less nested
+	if r.URL.Query().Get("action") != "" {
+		ctName := r.URL.Query().Get("ctName")
+		if ctName == "" {
+			http.Error(w, "No container specified", http.StatusBadRequest)
+			return fmt.Errorf("No container specified")
+		}
+		if ok, err := session.OwnsContainer(sess, ctName); ok == false {
+			if err == nil {
+				err = fmt.Errorf("Container not owned by this session")
+			}
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return err
+		}
 
-      ctInfo, err := containers.GetContainer(ctName)
-      if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-          log.Println("Error deleting container", ctName, err)
-        return err
-      } 
-      component := indexContainerRow(ctInfo)
-      err = component.Render(r.Context(), w)
-      if err != nil {
-      	http.Error(w, err.Error(), http.StatusBadRequest)
-      	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
-        return err
-      }
-      return nil
-    }
-  }
-  return nil
+		if r.URL.Query().Get("action") == "stop" {
+			err := containers.StopContainer(ctName)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				log.Println("Error stopping container", ctName, err)
+				return err
+			}
+			session.RemoveContainer(sess, ctName)
+
+			ctInfo, err := containers.GetContainer(ctName)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				log.Println("Error deleting container", ctName, err)
+				return err
+			}
+			component := indexContainerRow(ctInfo)
+			err = component.Render(r.Context(), w)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+				return err
+			}
+			return nil
+		}
+	}
+	return nil
 }
