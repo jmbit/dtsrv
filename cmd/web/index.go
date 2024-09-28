@@ -1,9 +1,9 @@
 package web
 
 import (
-	"dtsrv/internal/containers"
-	"dtsrv/internal/reverseproxy"
-	"dtsrv/internal/session"
+	"github.com/jmbit/dtsrv/lib/containers"
+	"github.com/jmbit/dtsrv/lib/reverseproxy"
+	"github.com/jmbit/dtsrv/internal/session"
 	"fmt"
 	"log"
 	"net/http"

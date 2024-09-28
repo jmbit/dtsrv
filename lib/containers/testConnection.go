@@ -36,7 +36,7 @@ func TestConnectionToContainer(ctName string) (bool, error) {
 	}
 	if timeoutCounter > maxTimeout {
 		containerTimeouts.Delete(ctName)
-		return false, fmt.Errorf("Could not connect to %s on ", ctName, cturl)
+		return false, fmt.Errorf("Could not connect to %s on %s", ctName, cturl)
 	}
 	return false, nil
 

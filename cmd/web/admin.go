@@ -1,12 +1,14 @@
 package web
 
 import (
-	"dtsrv/internal/containers"
-	"dtsrv/internal/reverseproxy"
-	"dtsrv/internal/session"
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/jmbit/dtsrv/internal/admin"
+	"github.com/jmbit/dtsrv/internal/session"
+	"github.com/jmbit/dtsrv/lib/containers"
+	"github.com/jmbit/dtsrv/lib/reverseproxy"
 
 	"net/http"
 )
@@ -20,9 +22,19 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if admin == false {
 		authorized, err := adminLoginHandler(w, r)
-		if err != nil || authorized == false {
-			return
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+    if authorized == false {
+		component := AdminLogin()
+		err := component.Render(r.Context(), w)
+		  if err != nil {
+		  	http.Error(w, err.Error(), http.StatusBadRequest)
+		  	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+        return
+		  }
+    return
+    }
 	}
 
 	// handle queries with url parameters (always include action in this case)
@@ -49,6 +61,14 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 
 // adminLoginHandler() takes care of login
 func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool, error) {
+  authorized, err := admin.Login(w, r)
+  if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+    return false, err
+  }
+  if authorized == true  {
+    return true, nil
+  }
 	if r.Method == http.MethodPost {
 		sess, err := session.SessionStore.Get(r, "session")
 		if err != nil {
@@ -81,7 +101,7 @@ func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool, error) {
 		return false, nil
 	}
 	component := AdminLogin()
-	err := component.Render(r.Context(), w)
+	err = component.Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Fatalf("Error rendering in AdminWebHandler: %e", err)

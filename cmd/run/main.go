@@ -1,8 +1,8 @@
 package main
 
 import (
-	"dtsrv/internal/containers"
-	"dtsrv/internal/server"
+	"github.com/jmbit/dtsrv/lib/containers"
+	"github.com/jmbit/dtsrv/internal/server"
 	"fmt"
 	"log"
 	"os"

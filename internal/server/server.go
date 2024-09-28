@@ -1,7 +1,7 @@
 package server
 
 import (
-	"dtsrv/internal/middlewares"
+	"github.com/jmbit/dtsrv/internal/middlewares"
 	"fmt"
 	"net/http"
 	"os"

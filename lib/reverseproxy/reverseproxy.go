@@ -1,7 +1,7 @@
 package reverseproxy
 
 import (
-	"dtsrv/internal/containers"
+	"github.com/jmbit/dtsrv/lib/containers"
 	"fmt"
 	"log"
 	"net/http"

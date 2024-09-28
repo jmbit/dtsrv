@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"os"
 
-	"dtsrv/cmd/web"
-	"dtsrv/internal/reverseproxy"
+	"github.com/jmbit/dtsrv/cmd/web"
+	"github.com/jmbit/dtsrv/lib/reverseproxy"
 )
 
 func registerRoutes() http.Handler {
