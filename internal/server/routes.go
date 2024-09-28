@@ -25,7 +25,7 @@ func registerRoutes() http.Handler {
 		mux.HandleFunc("/view/{ctName}/files", reverseproxy.HandleUnauthorized)
 	}
 
-  dist, err := fs.Sub(frontend.Files, "dist")
+  dist, err := fs.Sub(frontend.Dist, "dist")
   if err != nil {
     panic(err)
   }
