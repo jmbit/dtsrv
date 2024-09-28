@@ -114,6 +114,16 @@ func OwnsContainer(s *sessions.Session, ctName string) (bool, error) {
 	return false, nil
 }
 
+
+// IsAdmin() checks if the session is logged in as Admin
+func IsAdmin(s *sessions.Session) (bool, error) {
+	if isAdmin, ok := s.Values["admin"].(bool); ok && isAdmin {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // serializeToJSON() turns a slice to a JSON string
 func serializeToJSON(slice []string) (string, error) {
 	jsonData, err := json.Marshal(slice)

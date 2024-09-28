@@ -21,8 +21,8 @@ type ContainerData struct {
   Created time.Time `json:",omitempty"`
 }
 
-// ContainerStart() starts a new container
-func ContainerStart(w http.ResponseWriter, r *http.Request) {
+// NewContainer() creates and starts a new container
+func NewContainer(w http.ResponseWriter, r *http.Request) {
 	sess, err := session.SessionStore.Get(r, "session")
 	if err != nil {
     JsonError(w, r, err, http.StatusInternalServerError)
@@ -55,7 +55,7 @@ func ContainerStart(w http.ResponseWriter, r *http.Request) {
     return
 	}
   ctData := ContainerData{Name: ctName}
-  returnContainerData(w, r, ctData)
+  returnJson(w, r, ctData)
 }
 
 // ContainerReady() checks if a container is ready to accept the incoming session
@@ -67,7 +67,7 @@ func ContainerReady(w http.ResponseWriter, r *http.Request) {
     JsonError(w, r, err, http.StatusInternalServerError)
   }
   ctData := ContainerData{Name: ctName, Ready: ready}
-  returnContainerData(w, r, ctData)
+  returnJson(w, r, ctData)
 }
 
 // ListContainers() returns a list of containers, for admins it's all containers,
@@ -92,18 +92,105 @@ func ListContainers(w http.ResponseWriter, r *http.Request) {
         Name: raw.Names[0],
         Image: raw.Image,
         State: raw.State,
-
       }
       retCtList = append(retCtList, ct)
     }
-    
+  } else {
+	  sess, err := session.SessionStore.Get(r, "session")
+	  if err != nil {
+      log.Println("Error in ListContainers API function: ", err)
+      JsonError(w, r, err, http.StatusInternalServerError)
+	  	return
+	  }
+    for _, raw := range rawCtList {
+      owned, err := session.OwnsContainer(sess, raw.Names[0])
+  	  if err != nil {
+        log.Println("Error in ListContainers API function: ", err)
+        continue
+  	  }
+      if owned == true {
+        ct := ContainerData{
+         Name: raw.Names[0],
+         Image: raw.Image,
+         State: raw.State,
+       }
+       retCtList = append(retCtList, ct)       
+      }
+    }
   }
+  returnJson(w, r, rawCtList)
+}
 
+// StopContainer() stops a container
+func StopContainer(w http.ResponseWriter, r *http.Request) {
+  ctName := r.PathValue("ctName")
+  sess, err := session.SessionStore.Get(r, "session")
+  if err != nil {
+    log.Println("Error in StopContainer API function: ", err)
+    JsonError(w, r, err, http.StatusInternalServerError)
+  	return
+  }
+  isAdmin, err := session.IsAdmin(sess)
+  if err != nil {
+    log.Println("Error in StopContainer API function: ", err)
+    JsonError(w, r, err, http.StatusUnauthorized)
+  	return
+  }
+  owned, err := session.OwnsContainer(sess, ctName)
+  if err != nil {
+    log.Println("Error in StopContainer API function: ", err)
+    JsonError(w, r, err, http.StatusUnauthorized)
+  	return
+  }
+  if isAdmin || owned {
+    err := containers.StopContainer(ctName)
+    if err != nil {
+    JsonError(w, r, err, http.StatusInternalServerError)
+    }
+    w.WriteHeader(http.StatusOK)
+  } else {
+    reverseproxy.HandleUnauthorized(w, r)
+  }
+}
+
+// DeleteContainer() deletes a container
+func DeleteContainer(w http.ResponseWriter, r *http.Request) {
+  ctName := r.PathValue("ctName")
+  sess, err := session.SessionStore.Get(r, "session")
+  if err != nil {
+    log.Println("Error in DeleteContainer API function: ", err)
+    JsonError(w, r, err, http.StatusInternalServerError)
+  	return
+  }
+  isAdmin, err := session.IsAdmin(sess)
+  if err != nil {
+    log.Println("Error in DeleteContainer API function: ", err)
+    JsonError(w, r, err, http.StatusUnauthorized)
+  	return
+  }
+  owned, err := session.OwnsContainer(sess, ctName)
+  if err != nil {
+    log.Println("Error in DeleteContainer API function: ", err)
+    JsonError(w, r, err, http.StatusUnauthorized)
+  	return
+  }
+  if isAdmin || owned {
+    err := containers.DeleteContainer(ctName)
+    if err != nil {
+    JsonError(w, r, err, http.StatusInternalServerError)
+    }
+		// Delete proxy to prevent leaking memory
+		reverseproxy.DeleteContainerProxy(ctName)
+
+    w.WriteHeader(http.StatusOK)
+  } else {
+    reverseproxy.HandleUnauthorized(w, r)
+  }
 }
 
 
 // returnJson() marshals the struct to json and writes it to the response
-func returnContainerData(w http.ResponseWriter, r *http.Request, data any) error {
+func returnJson(w http.ResponseWriter, r *http.Request, data any) error {
   w.Header().Add("content-type", "application/json")
   jsonData, err := json.MarshalIndent(data, "", " ") 
   if err != nil {
