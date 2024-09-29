@@ -14,9 +14,10 @@ var containerTimeouts sync.Map
 var maxTimeout = 30
 
 // testConnectionToContainer() takes the Id of a container and checks if it's reachable on Port 3000
-func TestConnectionToContainer(ctName string) (bool, error) {
+// if port is nil, will try to automagically find port
+func TestConnectionToContainer(ctName string, port *int) (bool, error) {
 	timeoutCounter := getTimeoutCount(ctName)
-	cturl, err := GetContainerUrl(ctName)
+	cturl, err := GetContainerUrl(ctName, port)
 	if err != nil {
 		return false, err
 	}

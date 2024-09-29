@@ -28,7 +28,7 @@ func NewContainer(w http.ResponseWriter, r *http.Request) {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	ctName, err := containers.CreateContainer()
+	ctName, err := containers.CreateContainer("")
 	if err != nil {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
@@ -43,7 +43,7 @@ func NewContainer(w http.ResponseWriter, r *http.Request) {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	ctUrl, err := containers.GetContainerUrl(ctName)
+	ctUrl, err := containers.GetContainerUrl(ctName, nil)
 	if err != nil {
 		log.Println("Error parsing container url,", err)
     JsonError(w, r, err, http.StatusBadRequest)
@@ -61,7 +61,7 @@ func NewContainer(w http.ResponseWriter, r *http.Request) {
 // ContainerReady() checks if a container is ready to accept the incoming session
 func ContainerReady(w http.ResponseWriter, r *http.Request) {
   ctName := r.PathValue("ctName")
-	ready, err := containers.TestConnectionToContainer(ctName)
+	ready, err := containers.TestConnectionToContainer(ctName, nil)
   if err != nil {
     log.Println("Error in ContainerReady API function: ", err)
     JsonError(w, r, err, http.StatusInternalServerError)

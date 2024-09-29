@@ -17,7 +17,7 @@ import (
 )
 
 // PullContainer() pulls the container image
-func PullContainer() error {
+func PullContainer(dockerImage string) error {
 	nullwriter, err := os.Open(os.DevNull)
 	if err != nil {
 		log.Println("Could not open /dev/null")
@@ -34,8 +34,8 @@ func PullContainer() error {
 	defer cli.Close()
 
 	var imageName string
-	if envImage, exists := os.LookupEnv("IMAGE_NAME"); exists == true {
-		imageName = envImage
+	if dockerImage != "" {
+		imageName = dockerImage 
 	} else {
 
 		imageName = "lscr.io/linuxserver/webtop"

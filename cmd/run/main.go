@@ -21,7 +21,7 @@ func main() {
 		log.Printf("Set Admin PW to %s temporarily, please set a proper admin PW.\n", pw)
 	}
 	// Start background job to fetch container image
-	go containers.PullContainer()
+	go containers.PullContainer("")
 
 	server := server.NewServer()
 

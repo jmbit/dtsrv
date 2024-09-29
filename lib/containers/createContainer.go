@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -12,15 +11,15 @@ import (
 )
 
 // CreateContainer() wraps creatContainer asyncronously to avoid UI lag,
-// wraps createContainer()
-func CreateContainer() (string, error) {
+// wraps createContainer(). If Image "" is specified, will use default instead
+func CreateContainer(dockerImage string) (string, error) {
 	ctName := fmt.Sprintf("dtsrv-%s", uuid.New().String())
-	err := createContainer(ctName)
+	err := createContainer(ctName, dockerImage)
 	return ctName, err
 }
 
 // createContainer() creates a container with the given name.
-func createContainer(ctName string) error {
+func createContainer(ctName string, dockerImage string) error {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -31,8 +30,8 @@ func createContainer(ctName string) error {
 
 	var imageName string
 	// Get image from environment variable, fallback to default if required
-	if envImage, exists := os.LookupEnv("IMAGE_NAME"); exists == true {
-		imageName = envImage
+	if dockerImage != "" {
+		imageName = dockerImage
 	} else {
 		imageName = "lscr.io/linuxserver/webtop"
 	}
