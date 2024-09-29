@@ -1,27 +1,22 @@
 package main
 
 import (
-	"dtsrv/internal/containers"
-	"dtsrv/internal/server"
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/gorilla/securecookie"
+	"github.com/jmbit/dtsrv/internal/config"
+	"github.com/jmbit/dtsrv/internal/server"
+	"github.com/jmbit/dtsrv/lib/containers"
+
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	var err error
+  config.ReadConfigFile("")
 
-	// Get or generate Admin PW
-	if os.Getenv("ADMIN_PW") == "" {
-		pw := string(securecookie.GenerateRandomKey(32))
-		os.Setenv("ADMIN_PW", pw)
-		log.Printf("Set Admin PW to %s temporarily, please set a proper admin PW.\n", pw)
-	}
 	// Start background job to fetch container image
-	go containers.PullContainer()
+	go containers.PullContainer("")
 
 	server := server.NewServer()
 

@@ -1,7 +1,7 @@
 package reverseproxy
 
 import (
-	"dtsrv/internal/containers"
+	"github.com/jmbit/dtsrv/lib/containers"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,12 +82,13 @@ func HandleReverseProxy(w http.ResponseWriter, r *http.Request) {
 }
 
 // loadProxy() retrieves the pointer to the proxy from the map
+// If no proxy exists, tries to create one with the port guessed by NewContainerProxy()
 func loadProxy(ctName string) (*httputil.ReverseProxy, error) {
 	// sync.Map doesn't support typed objects
 	var proxyObject any
 	proxyObject, ok := containerProxies.Load(ctName)
 	if ok == false {
-		url, err := containers.GetContainerUrl(ctName)
+		url, err := containers.GetContainerUrl(ctName, nil)
 		if err != nil {
 			return nil, err
 		}

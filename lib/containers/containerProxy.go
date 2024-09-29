@@ -3,15 +3,12 @@ package containers
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"strconv"
-
 	"github.com/docker/docker/client"
 )
 
-// GetContainerUrl finds the IP and port a container listens on
-func GetContainerUrl(ctName string) (string, error) {
+// GetContainerUrl finds the IP and port a container listens on 
+// 
+func GetContainerUrl(ctName string, containerPort *int) (string, error) {
 	var port int
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -25,12 +22,8 @@ func GetContainerUrl(ctName string) (string, error) {
 	}
 	ctIP := container.NetworkSettings.IPAddress
 	// attempt to get container listen port from environment variable, falling back to first port configured
-	if os.Getenv("CONTAINER_PORT") != "" {
-		port, err = strconv.Atoi(os.Getenv("CONTAINER_PORT"))
-		if err != nil {
-			log.Println("Invalid CONTAINER_PORT environment variable!")
-			return "", err
-		}
+	if containerPort != nil {
+		port = *containerPort
 	} else {
 		ctPorts := container.NetworkSettings.Ports
 		// Hack to get the first port from the map.
