@@ -31,3 +31,6 @@ dtsrv
 
 #Database
 db.sqlite
+
+#Config
+config.toml

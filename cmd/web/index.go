@@ -1,12 +1,14 @@
 package web
 
 import (
-	"github.com/jmbit/dtsrv/lib/containers"
-	"github.com/jmbit/dtsrv/lib/reverseproxy"
-	"github.com/jmbit/dtsrv/internal/session"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/jmbit/dtsrv/internal/session"
+	"github.com/jmbit/dtsrv/lib/containers"
+	"github.com/jmbit/dtsrv/lib/reverseproxy"
+	"github.com/spf13/viper"
 
 	"github.com/docker/docker/api/types"
 )
@@ -59,7 +61,7 @@ func StartWebHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctName, err := containers.CreateContainer()
+	ctName, err := containers.CreateContainer(viper.GetString("container.image"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,7 +76,8 @@ func StartWebHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctUrl, err := containers.GetContainerUrl(ctName)
+  port := viper.GetInt("container.port")
+	ctUrl, err := containers.GetContainerUrl(ctName, &port)
 	if err != nil {
 		log.Println("Error parsing container url,", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -95,8 +98,9 @@ func StartWebHandler(w http.ResponseWriter, r *http.Request) {
 // StartStatusWebHandler() is called pereodically after starting a container
 func StartStatusWebHandler(w http.ResponseWriter, r *http.Request) {
 	ctName := r.PathValue("ctName")
+  port := viper.GetInt("container.port")
 	component := StartSpinner(ctName)
-	running, err := containers.TestConnectionToContainer(ctName)
+	running, err := containers.TestConnectionToContainer(ctName, &port)
 	if running == true {
 		w.Header().Add("HX-Redirect", fmt.Sprintf("/view/%s/", ctName))
 	}

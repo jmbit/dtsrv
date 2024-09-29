@@ -6,11 +6,10 @@ all: deps build
 
 deps:
 	@go mod tidy
-	@cd frontend && npm ci
 
 build:
 	@echo "Building..."
-	@cd frontend && npm run build
+	@templ generate
 	@go build -o dtsrv cmd/run/main.go
 
 # Run the application
