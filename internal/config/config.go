@@ -42,8 +42,10 @@ func setDefaults() {
   viper.SetDefault("web.blockfilebrowser", false)
   viper.SetDefault("web.adminpw", string(securecookie.GenerateRandomKey(32)))
 	// Containers
-  viper.SetDefault("container.image", "lscr.io/linuxserver/webtop:alpine-icewm")
+  viper.SetDefault("container.image", "lscr.io/linuxserver/firefox")
   viper.SetDefault("container.port", 3000)
+  viper.SetDefault("container.isolated", false)
+  viper.SetDefault("container.gpu", "")
 }
 
 func SaveConfig() error {

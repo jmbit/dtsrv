@@ -11,6 +11,7 @@ templ Admin(imageName string, cts []types.Container) {
   @Base("Admin") {
     <p>Using Docker image {imageName}</p>
     <a class="button" href="/admin?action=logout">Logout</a>
+    <a class="button" href="/admin?action=reload">Reload Config</a>
     <div>
     <h2>Containers</h2>
     <table>

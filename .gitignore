@@ -34,3 +34,6 @@ db.sqlite
 
 #Config
 config.toml
+
+#Sessions
+sessions/*

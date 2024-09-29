@@ -7,8 +7,8 @@ import (
 )
 
 // GetContainerUrl finds the IP and port a container listens on 
-// 
-func GetContainerUrl(ctName string, containerPort *int) (string, error) {
+// set port to 0 to use autodetect
+func GetContainerUrl(ctName string, containerPort int) (string, error) {
 	var port int
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -22,8 +22,8 @@ func GetContainerUrl(ctName string, containerPort *int) (string, error) {
 	}
 	ctIP := container.NetworkSettings.IPAddress
 	// attempt to get container listen port from environment variable, falling back to first port configured
-	if containerPort != nil {
-		port = *containerPort
+	if containerPort != 0 {
+		port = containerPort
 	} else {
 		ctPorts := container.NetworkSettings.Ports
 		// Hack to get the first port from the map.

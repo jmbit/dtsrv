@@ -18,12 +18,6 @@ import (
 
 // PullContainer() pulls the container image
 func PullContainer(dockerImage string) error {
-	nullwriter, err := os.Open(os.DevNull)
-	if err != nil {
-		log.Println("Could not open /dev/null")
-		panic(1)
-	}
-
 	log.Println("pulling container image")
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -38,7 +32,7 @@ func PullContainer(dockerImage string) error {
 		imageName = dockerImage 
 	} else {
 
-		imageName = "lscr.io/linuxserver/webtop"
+    imageName = "lscr.io/linuxserver/webtop:alpine-icewm"
 	}
 
 	out, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
@@ -46,8 +40,11 @@ func PullContainer(dockerImage string) error {
 		log.Println("Error pulling Docker image:", err)
 		return err
 	}
+  _, err = io.ReadAll(out)
+  if err != nil {
+    log.Println(err)
+  }
 	defer out.Close()
-	io.Copy(nullwriter, out)
 
 	log.Println("Done pulling container image")
 	return nil

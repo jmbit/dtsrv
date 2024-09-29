@@ -31,7 +31,6 @@ func IndexWebHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Println(containerNameList)
 	containerRawList, err := containers.ListContainers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -58,26 +57,31 @@ func IndexWebHandler(w http.ResponseWriter, r *http.Request) {
 func StartWebHandler(w http.ResponseWriter, r *http.Request) {
 	sess, err := session.SessionStore.Get(r, "session")
 	if err != nil {
+    log.Println("Error in StartWebHandler", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctName, err := containers.CreateContainer(viper.GetString("container.image"))
+	ctName, err := containers.CreateContainer(viper.GetString("container.image"), viper.GetBool("container.isolated"))
 	if err != nil {
+    log.Println("Error creating Container in StartWebHandler", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = session.AppendContainer(sess, ctName)
 	if err != nil {
+    log.Println("Error Adding container to session in StartWebHandler", err)
+    log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = sess.Save(r, w)
 	if err != nil {
+    log.Println("Error saving Session in StartWebHandler", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
   port := viper.GetInt("container.port")
-	ctUrl, err := containers.GetContainerUrl(ctName, &port)
+	ctUrl, err := containers.GetContainerUrl(ctName, port)
 	if err != nil {
 		log.Println("Error parsing container url,", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -100,12 +104,12 @@ func StartStatusWebHandler(w http.ResponseWriter, r *http.Request) {
 	ctName := r.PathValue("ctName")
   port := viper.GetInt("container.port")
 	component := StartSpinner(ctName)
-	running, err := containers.TestConnectionToContainer(ctName, &port)
+	running, err := containers.TestConnectionToContainer(ctName, port)
 	if running == true {
 		w.Header().Add("HX-Redirect", fmt.Sprintf("/view/%s/", ctName))
 	}
 	if err != nil {
-		log.Println(err)
+    log.Println("Error in StartStatusWebHandler:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	err = component.Render(r.Context(), w)

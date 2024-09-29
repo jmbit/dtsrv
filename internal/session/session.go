@@ -3,17 +3,17 @@ package session
 import (
 	"encoding/json"
 	"log"
-	"os"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/spf13/viper"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 var SessionStore sessions.FilesystemStore
 
-func init() {
+func InitSessions() {
 	SessionStore = sessionStore()
 
 }
@@ -21,12 +21,14 @@ func init() {
 // sessionStore() sets up the session filesystem store
 func sessionStore() sessions.FilesystemStore {
 	var key []byte
-	if keystring, ok := os.LookupEnv("SESSION_KEY"); ok == true {
-		key = []byte(keystring)
+	if viper.GetString("web.sessionkey") != "" {
+		key = []byte(viper.GetString("web.sessionkey"))
 	} else {
+    log.Println("Generating new session key")
 		key = securecookie.GenerateRandomKey(32)
 	}
-	return *sessions.NewFilesystemStore(os.Getenv("SESSION_PATH"), key)
+  log.Println("Sessions stored in ", viper.GetString("web.sessionpath"))
+	return *sessions.NewFilesystemStore(viper.GetString("web.sessionpath"), key)
 }
 
 // AppendContainer() adds a container to a session

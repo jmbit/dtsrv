@@ -88,7 +88,7 @@ func loadProxy(ctName string) (*httputil.ReverseProxy, error) {
 	var proxyObject any
 	proxyObject, ok := containerProxies.Load(ctName)
 	if ok == false {
-		url, err := containers.GetContainerUrl(ctName, nil)
+		url, err := containers.GetContainerUrl(ctName, 0)
 		if err != nil {
 			return nil, err
 		}

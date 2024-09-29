@@ -15,21 +15,26 @@ var maxTimeout = 30
 
 // testConnectionToContainer() takes the Id of a container and checks if it's reachable on Port 3000
 // if port is nil, will try to automagically find port
-func TestConnectionToContainer(ctName string, port *int) (bool, error) {
+func TestConnectionToContainer(ctName string, port int) (bool, error) {
 	timeoutCounter := getTimeoutCount(ctName)
 	cturl, err := GetContainerUrl(ctName, port)
 	if err != nil {
+    log.Println("Error getting URL for Container", ctName)
 		return false, err
 	}
 
 	log.Printf("Trying to connect to %s", cturl)
 	resp, err := http.Get(cturl)
+	if err != nil {
+    log.Println("Error getting response from", ctName)
+		return false, err
+	}
 	log.Println("Code", resp.Status, err)
 	if resp.StatusCode == 200 {
 		return true, nil
 	}
 	log.Printf("Trying to connect to http://%s/view/%s/", cturl, ctName)
-	resp, err = http.Get(fmt.Sprintf("http://%s/view/%s/", cturl, ctName))
+	resp, err = http.Get(fmt.Sprintf("%s/view/%s/", cturl, ctName))
 	log.Println("Code", resp.Status, err)
 	if resp.StatusCode == 200 {
 		containerTimeouts.Delete(ctName)

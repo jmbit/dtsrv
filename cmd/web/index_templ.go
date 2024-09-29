@@ -155,7 +155,7 @@ func StartSpinner(uuid string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"every 1200ms\" hx-target=\"this\" hx-swap=\"innerHTML\"><div class=\"lds-spinner\"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"every 1200ms\" hx-target=\"this\" hx-swap=\"innerHTML\"><img src=\"assets/img/sealspin.gif\" alt=\"a spinning seal\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

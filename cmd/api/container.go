@@ -10,6 +10,7 @@ import (
 	"github.com/jmbit/dtsrv/internal/session"
 	"github.com/jmbit/dtsrv/lib/containers"
 	"github.com/jmbit/dtsrv/lib/reverseproxy"
+	"github.com/spf13/viper"
 )
 
 // ContainerData gets populated as needed
@@ -28,7 +29,7 @@ func NewContainer(w http.ResponseWriter, r *http.Request) {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	ctName, err := containers.CreateContainer("")
+	ctName, err := containers.CreateContainer(viper.GetString("container.image"), viper.GetBool("container.isolated"))
 	if err != nil {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
@@ -43,7 +44,7 @@ func NewContainer(w http.ResponseWriter, r *http.Request) {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	ctUrl, err := containers.GetContainerUrl(ctName, nil)
+	ctUrl, err := containers.GetContainerUrl(ctName, 0)
 	if err != nil {
 		log.Println("Error parsing container url,", err)
     JsonError(w, r, err, http.StatusBadRequest)
@@ -61,7 +62,7 @@ func NewContainer(w http.ResponseWriter, r *http.Request) {
 // ContainerReady() checks if a container is ready to accept the incoming session
 func ContainerReady(w http.ResponseWriter, r *http.Request) {
   ctName := r.PathValue("ctName")
-	ready, err := containers.TestConnectionToContainer(ctName, nil)
+	ready, err := containers.TestConnectionToContainer(ctName, 0)
   if err != nil {
     log.Println("Error in ContainerReady API function: ", err)
     JsonError(w, r, err, http.StatusInternalServerError)

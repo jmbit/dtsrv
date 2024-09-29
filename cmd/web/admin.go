@@ -6,9 +6,11 @@ import (
 	"os"
 
 	"github.com/jmbit/dtsrv/internal/admin"
+	"github.com/jmbit/dtsrv/internal/config"
 	"github.com/jmbit/dtsrv/internal/session"
 	"github.com/jmbit/dtsrv/lib/containers"
 	"github.com/jmbit/dtsrv/lib/reverseproxy"
+	"github.com/spf13/viper"
 
 	"net/http"
 )
@@ -47,7 +49,7 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	imageName := containers.GetImageName()
+	imageName := viper.GetString("container.image")
 
 	component := Admin(imageName, ctList)
 	err = component.Render(r.Context(), w)
@@ -131,6 +133,9 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
 
 			return nil
 		}
+    if r.URL.Query().Get("action") == "reload" {
+      config.ReadConfigFile("")
+    }
 
 		// anything else from here on works on containers, so check if there is one in the query
 		ctName := r.URL.Query().Get("ctName")

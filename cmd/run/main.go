@@ -6,17 +6,24 @@ import (
 
 	"github.com/jmbit/dtsrv/internal/config"
 	"github.com/jmbit/dtsrv/internal/server"
+	"github.com/jmbit/dtsrv/internal/session"
 	"github.com/jmbit/dtsrv/lib/containers"
+	"github.com/spf13/viper"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	var err error
+
+  // Read configuration
   config.ReadConfigFile("")
 
 	// Start background job to fetch container image
-	go containers.PullContainer("")
+	go containers.PullContainer(viper.GetString("container.image"))
+
+  //Setup Session store etc
+  session.InitSessions()
 
 	server := server.NewServer()
 

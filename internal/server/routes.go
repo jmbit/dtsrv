@@ -2,11 +2,11 @@ package server
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/jmbit/dtsrv/cmd/api"
 	"github.com/jmbit/dtsrv/cmd/web"
 	"github.com/jmbit/dtsrv/lib/reverseproxy"
+	"github.com/spf13/viper"
 )
 
 func registerRoutes() http.Handler {
@@ -29,7 +29,7 @@ func registerRoutes() http.Handler {
 
 
 	mux.HandleFunc("/view/{ctName}/", reverseproxy.HandleReverseProxy)
-	if _, ok := os.LookupEnv("BLOCK_FILEBROWSER"); ok == true {
+	if viper.GetBool("web.blockfilebrowser") {
 		mux.HandleFunc("/view/{ctName}/files", reverseproxy.HandleUnauthorized)
 	}
 
