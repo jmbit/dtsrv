@@ -92,22 +92,6 @@ func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool, error) {
 			}
 			return true, nil
 		}
-	} else {
-		component := AdminLogin()
-		err := component.Render(r.Context(), w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			log.Fatalf("Error rendering in AdminWebHandler: %e", err)
-			return false, err
-		}
-		return false, nil
-	}
-	component := AdminLogin()
-	err = component.Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Fatalf("Error rendering in AdminWebHandler: %e", err)
-		return false, err
 	}
 	return false, nil
 }
