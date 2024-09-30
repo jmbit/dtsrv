@@ -47,10 +47,11 @@ watch:
 
 install:
 	@install -d /usr/local/bin; \
+	mkdir -p /var/local/lib/dtsrv ;\
 	useradd -r -d /var/local/lib/dtsrv dtsrv; \
 	install -m 755 dtsrv /usr/local/bin/; \
 	install -d -o root -g root /etc/dtsrv; \
-	install -d -o root -g root dtsrv.service /etc/systemd/system/dtsrv.service; \
+	install -o root -g root dtsrv.service /etc/systemd/system/dtsrv.service; \
 	chown dtsrv:dtsrv /var/local/lib/dtsrv; \
    chmod 700 /var/local/lib/dtsrv; \
 	usermod -aG docker dtsrv; \
