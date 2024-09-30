@@ -5,6 +5,7 @@ all: deps build
 
 
 deps:
+	@go install github.com/a-h/templ/cmd/templ@latest
 	@go mod tidy
 
 build:
