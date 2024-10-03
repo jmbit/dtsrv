@@ -1,12 +1,12 @@
 package server
 
 import (
-	"github.com/jmbit/dtsrv/internal/middlewares"
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
+
+	"github.com/jmbit/dtsrv/internal/middlewares"
+	"github.com/spf13/viper"
 
 	"github.com/gorilla/handlers"
 
@@ -15,7 +15,7 @@ import (
 
 // NewServer() builds a http server with middlewares and config from env
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+
 
 	middlewareStack := middlewares.CreateStack(
 		middlewares.AssetCaching,
@@ -25,7 +25,7 @@ func NewServer() *http.Server {
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", port),
+		Addr:         fmt.Sprintf("%s:%d", viper.GetString("web.host"), viper.GetInt("web.port")),
 		Handler:      middlewareStack(registerRoutes()),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
