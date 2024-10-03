@@ -58,6 +58,13 @@ func createContainer(ctName string, dockerImage string, isolate bool) error {
 	  	log.Println("Error creating container network,", err)
 	  	return err
 	  }
+
+    err = cli.NetworkDisconnect(ctx, "bridge", resp.ID, true)
+	  if err != nil {
+	  	log.Println("Error detatching container from default network,", err)
+	  	return err
+	  }
+
     err = cli.NetworkConnect(ctx, resp.ID, ctName, &network.EndpointSettings{})
 	  if err != nil {
 	  	log.Println("Error connecting container to network,", err)

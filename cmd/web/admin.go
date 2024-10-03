@@ -118,6 +118,7 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
 		}
     if r.URL.Query().Get("action") == "reload" {
       config.ReadConfigFile("")
+      return nil
     }
 
 		// anything else from here on works on containers, so check if there is one in the query
