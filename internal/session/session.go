@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/jmbit/dtsrv/internal/utils"
 	"github.com/spf13/viper"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -26,10 +26,14 @@ func sessionStore() sessions.FilesystemStore {
 		key = []byte(viper.GetString("web.sessionkey"))
 	} else {
     log.Println("Generating new session key")
-		key = securecookie.GenerateRandomKey(32)
+    keystring, err := utils.RandomString(32)
+    if err != nil {
+      log.Fatal(err)
+    }
+    key = []byte(keystring)
 	}
   if _, err := os.Stat(viper.GetString("web.sessionpath")); err != nil {
-    err := os.Mkdir(viper.GetString("web.sessionpath"), 700)
+    err := os.MkdirAll(viper.GetString("web.sessionpath"), os.ModePerm)
     if err != nil {
       log.Println("Error creating directory for sessions:", err)
       panic(1)

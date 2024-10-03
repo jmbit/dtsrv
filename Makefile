@@ -53,7 +53,7 @@ install:
 	install -d -o root -g root /etc/dtsrv; \
 	install -o root -g root dtsrv.service /etc/systemd/system/dtsrv.service; \
 	chown dtsrv:dtsrv /var/local/lib/dtsrv; \
-   chmod 700 /var/local/lib/dtsrv; \
+  chmod 700 /var/local/lib/dtsrv; \
 	usermod -aG docker dtsrv; \
 
 install-docker-debian:

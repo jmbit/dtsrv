@@ -1,10 +1,11 @@
 package admin
 
 import (
-  "net/http"
-  "github.com/jmbit/dtsrv/internal/session"
-  "os"
-  "log"
+	"log"
+	"net/http"
+
+	"github.com/jmbit/dtsrv/internal/session"
+	"github.com/spf13/viper"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) (bool, error){
@@ -18,7 +19,7 @@ func Login(w http.ResponseWriter, r *http.Request) (bool, error){
 		if err != nil {
 			return false, err
 		}
-		if r.PostFormValue("password") == os.Getenv("ADMIN_PW") {
+		if r.PostFormValue("password") == viper.GetString("web.adminpw") {
 			sess.Values["admin"] = true
 			err := sess.Save(r, w)
 			if err != nil {

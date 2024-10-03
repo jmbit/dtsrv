@@ -3,7 +3,6 @@ package web
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/jmbit/dtsrv/internal/admin"
 	"github.com/jmbit/dtsrv/internal/config"
@@ -83,7 +82,7 @@ func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool, error) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return false, err
 		}
-		if r.PostFormValue("password") == os.Getenv("ADMIN_PW") {
+		if r.PostFormValue("password") == viper.GetString("web.adminpw") {
 			sess.Values["admin"] = true
 			err := sess.Save(r, w)
 			if err != nil {
