@@ -3,6 +3,7 @@ package session
 import (
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -27,6 +28,13 @@ func sessionStore() sessions.FilesystemStore {
     log.Println("Generating new session key")
 		key = securecookie.GenerateRandomKey(32)
 	}
+  if _, err := os.Stat(viper.GetString("web.sessionpath")); err != nil {
+    err := os.Mkdir(viper.GetString("web.sessionpath"), 700)
+    if err != nil {
+      log.Println("Error creating directory for sessions:", err)
+      panic(1)
+    }
+  }
   log.Println("Sessions stored in ", viper.GetString("web.sessionpath"))
 	return *sessions.NewFilesystemStore(viper.GetString("web.sessionpath"), key)
 }
