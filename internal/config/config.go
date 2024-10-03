@@ -3,12 +3,13 @@ package config
 import (
 	"log"
 
-	"github.com/gorilla/securecookie"
+	"github.com/jmbit/dtsrv/internal/utils"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/spf13/viper"
 )
 
 func ReadConfigFile(configFile string) {
+	setDefaults()
 	if configFile != "" {
 		log.Println("reading Config file", configFile)
 		viper.SetConfigFile(configFile)
@@ -19,7 +20,6 @@ func ReadConfigFile(configFile string) {
 		viper.SetConfigType("toml")
 	}
 	viper.SetEnvPrefix("DTSRV")
-	setDefaults()
 
 	viper.ReadInConfig()
 	viper.AutomaticEnv()
@@ -28,9 +28,12 @@ func ReadConfigFile(configFile string) {
 		viper.WriteConfigAs("./config.toml")
 	}
 	log.Println("done reading config", viper.ConfigFileUsed())
+  log.Println(viper.AllSettings())
 }
 
 func setDefaults() {
+  adminPW, _ := utils.RandomString(32)
+  sessionKey, _ := utils.RandomString(32)
 	// Web
 	viper.SetDefault("web.port", 8080)
 	viper.SetDefault("web.host", "127.0.0.1")
@@ -38,9 +41,9 @@ func setDefaults() {
   viper.SetDefault("web.cert", "/etc/ssl/certs/ssl-cert-snakeoil.pem")
   viper.SetDefault("web.key", "/etc/ssl/key/ssl-cert-snakeoil.key")
 	viper.SetDefault("web.sessionpath", "./sessions")
-	viper.SetDefault("web.sessionkey", string(securecookie.GenerateRandomKey(32)))
+	viper.SetDefault("web.sessionkey", sessionKey)
   viper.SetDefault("web.blockfilebrowser", false)
-  viper.SetDefault("web.adminpw", string(securecookie.GenerateRandomKey(32)))
+  viper.SetDefault("web.adminpw", adminPW)
 	// Containers
   viper.SetDefault("container.image", "lscr.io/linuxserver/firefox")
   viper.SetDefault("container.port", 3000)

@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -15,7 +16,8 @@ import (
 
 // NewServer() builds a http server with middlewares and config from env
 func NewServer() *http.Server {
-
+  address := fmt.Sprintf("%s:%d", viper.GetString("web.host"), viper.GetInt("web.port"))
+  log.Println("Listening on", address)
 
 	middlewareStack := middlewares.CreateStack(
 		middlewares.AssetCaching,
@@ -25,7 +27,7 @@ func NewServer() *http.Server {
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", viper.GetString("web.host"), viper.GetInt("web.port")),
+		Addr:         address,
 		Handler:      middlewareStack(registerRoutes()),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
