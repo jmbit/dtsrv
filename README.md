@@ -4,14 +4,11 @@ Attempt to create a terminal server style application for Docker containers, mai
 
 ## Getting Started
 To get up and running with a (development) install of dtsrv, you need go, templ, air and docker installed on the system.
-you also need to create a `.env` file in the project directory like this:
+The program will create a default config file on first run in the working directory. This file should be moved to /etc/dtsrv for production use
 
-```env
-PORT=8080
-APP_ENV=local
-SESSION_KEY=randomkey
-IMAGE_NAME=nameofdockerimage
-```
+## TODO
+- Make isolation between containers work (currently doesn't reliably create proxy for isolated containers)
+- Add (optional) user login -> requires DB
 
 ## MakeFile
 
