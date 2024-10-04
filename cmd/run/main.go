@@ -22,6 +22,8 @@ func main() {
 	// Start background job to fetch container image
 	go containers.PullContainer(viper.GetString("container.image"))
 
+  go containers.StartCleanup(viper.GetInt64("container.maxage"), 600)
+
   //Setup Session store etc
   session.InitSessions()
 

@@ -49,6 +49,8 @@ func setDefaults() {
   viper.SetDefault("container.port", 3000)
   viper.SetDefault("container.isolated", false)
   viper.SetDefault("container.gpu", "")
+  // Default: 12h (in s)
+  viper.SetDefault("container.maxage", 43200)
 }
 
 func SaveConfig() error {
