@@ -24,7 +24,7 @@ type ContainerData struct {
 
 // NewContainer() creates and starts a new container
 func NewContainer(w http.ResponseWriter, r *http.Request) {
-	sess, err := session.SessionStore.Get(r, "session")
+	sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	if err != nil {
     JsonError(w, r, err, http.StatusInternalServerError)
 		return
@@ -97,7 +97,7 @@ func ListContainers(w http.ResponseWriter, r *http.Request) {
       retCtList = append(retCtList, ct)
     }
   } else {
-	  sess, err := session.SessionStore.Get(r, "session")
+	  sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	  if err != nil {
       log.Println("Error in ListContainers API function: ", err)
       JsonError(w, r, err, http.StatusInternalServerError)
@@ -125,7 +125,7 @@ func ListContainers(w http.ResponseWriter, r *http.Request) {
 // StopContainer() stops a container
 func StopContainer(w http.ResponseWriter, r *http.Request) {
   ctName := r.PathValue("ctName")
-  sess, err := session.SessionStore.Get(r, "session")
+  sess, err := session.SessionStore.Get(r, "dtsrv-session")
   if err != nil {
     log.Println("Error in StopContainer API function: ", err)
     JsonError(w, r, err, http.StatusInternalServerError)
@@ -157,7 +157,7 @@ func StopContainer(w http.ResponseWriter, r *http.Request) {
 // DeleteContainer() deletes a container
 func DeleteContainer(w http.ResponseWriter, r *http.Request) {
   ctName := r.PathValue("ctName")
-  sess, err := session.SessionStore.Get(r, "session")
+  sess, err := session.SessionStore.Get(r, "dtsrv-session")
   if err != nil {
     log.Println("Error in DeleteContainer API function: ", err)
     JsonError(w, r, err, http.StatusInternalServerError)

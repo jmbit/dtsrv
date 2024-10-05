@@ -8,7 +8,8 @@ import (
 
 // IsAdmin() checks if the session is logged in as Admin
 func IsAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
-	sess, err := session.SessionStore.Get(r, "session")
+
+	sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false, err

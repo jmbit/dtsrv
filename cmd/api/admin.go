@@ -22,7 +22,7 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminLogout(w http.ResponseWriter, r *http.Request) {
-			sess, err := session.SessionStore.Get(r, "session")
+			sess, err := session.SessionStore.Get(r, "dtsrv-session")
 			if err != nil {
         log.Println("Error in Admin logout handler: ", err)
 				JsonError(w, r, err, http.StatusInternalServerError)

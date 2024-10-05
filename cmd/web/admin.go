@@ -71,7 +71,7 @@ func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool, error) {
     return true, nil
   }
 	if r.Method == http.MethodPost {
-		sess, err := session.SessionStore.Get(r, "session")
+	  sess, err := session.SessionStore.Get(r, "dtsrv-session")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return false, err
@@ -101,7 +101,7 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Query().Get("action") != "" {
 		// log out user
 		if r.URL.Query().Get("action") == "logout" {
-			sess, err := session.SessionStore.Get(r, "session")
+	    sess, err := session.SessionStore.Get(r, "dtsrv-session")
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return err
@@ -170,7 +170,7 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
 
 // isAdmin() checks if the session is logged in as Admin
 func isAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
-	sess, err := session.SessionStore.Get(r, "session")
+	sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false, err

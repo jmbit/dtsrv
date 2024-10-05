@@ -10,7 +10,7 @@ import (
 
 func Login(w http.ResponseWriter, r *http.Request) (bool, error){
 	if r.Method == http.MethodPost {
-		sess, err := session.SessionStore.Get(r, "session")
+		sess, err := session.SessionStore.Get(r, "dtsrv-session")
 		if err != nil {
 			return false, err
 		}

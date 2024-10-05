@@ -15,7 +15,7 @@ import (
 
 // IndexWebHandler() is the main http handler for the application
 func IndexWebHandler(w http.ResponseWriter, r *http.Request) {
-	sess, err := session.SessionStore.Get(r, "session")
+	sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -55,7 +55,7 @@ func IndexWebHandler(w http.ResponseWriter, r *http.Request) {
 
 // StartWebHandler() starts a container
 func StartWebHandler(w http.ResponseWriter, r *http.Request) {
-	sess, err := session.SessionStore.Get(r, "session")
+	sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	if err != nil {
     log.Println("Error in StartWebHandler", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -121,7 +121,7 @@ func StartStatusWebHandler(w http.ResponseWriter, r *http.Request) {
 
 // indexQueryHandler() handles/works on any url parameters specified
 func indexQueryHandler(w http.ResponseWriter, r *http.Request) error {
-	sess, err := session.SessionStore.Get(r, "session")
+	sess, err := session.SessionStore.Get(r, "dtsrv-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return err
