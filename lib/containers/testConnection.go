@@ -33,7 +33,7 @@ func TestConnectionToContainer(ctName string, port int) (bool, error) {
 	if resp.StatusCode == 200 {
 		return true, nil
 	}
-	log.Printf("Trying to connect to http://%s/view/%s/", cturl, ctName)
+	log.Printf("Trying to connect to %s/view/%s/", cturl, ctName)
 	resp, err = http.Get(fmt.Sprintf("%s/view/%s/", cturl, ctName))
 	log.Println("Code", resp.Status, err)
 	if resp.StatusCode == 200 {

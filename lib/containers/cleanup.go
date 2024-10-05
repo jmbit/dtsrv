@@ -1,8 +1,12 @@
 package containers
 
 import (
+	"context"
 	"log"
 	"time"
+
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/client"
 )
 
 // startCleanup() starts the goroutines responsible for cleaning up unused containers
@@ -20,10 +24,11 @@ func deleteOldContainers(maxAge int64, interval int64) {
     if  err != nil {
       log.Println("Error in cleanup task:", err)
     }
+    ageDate := time.Now().Unix() - maxAge
+    log.Println("Deleting containers older than", time.Unix(ageDate, 0) )
     for _, ct := range cts {
       created := ct.Created
-      ageDate := time.Now().Unix() - maxAge
-      log.Println("Deleting containers older than ", time.Unix(ageDate, 0) )
+
       if created < ageDate {
         if ct.State == "running" {
           err := StopContainer(ct.Names[0])
@@ -42,8 +47,27 @@ func deleteOldContainers(maxAge int64, interval int64) {
       }
       
     }
+    PruneNetworks()
+
     time.Sleep(time.Second*time.Duration(interval))
   }
+}
 
 
+func PruneNetworks() error {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Println("Error creating container client,", err)
+		return err
+	}
+  pruneReport, err := cli.NetworksPrune(ctx, filters.Args{})
+  if err != nil {
+    log.Println("Error pruning networks:", err)
+    return err
+  }
+  if len(pruneReport.NetworksDeleted) > 0 {
+    log.Println("Deleted networks", pruneReport.NetworksDeleted)
+  }
+  return nil
 }
