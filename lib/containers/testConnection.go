@@ -23,7 +23,7 @@ func TestConnectionToContainer(ctName string, port int) (bool, error) {
 		return false, err
 	}
 
-	log.Printf("Trying to connect to %s", cturl)
+	log.Printf("Trying to connect to %s (%s)\n", ctName, cturl)
 	resp, err := http.Get(cturl)
 	if err != nil {
     log.Println("Error getting response from", ctName)

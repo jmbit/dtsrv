@@ -37,41 +37,35 @@ func createContainer(ctName string, dockerImage string, isolate bool) error {
 	} else {
 		imageName = "lscr.io/linuxserver/webtop"
 	}
+
   containerConfig := container.Config{
 		Env: []string{
 			fmt.Sprintf("SUBFOLDER=/view/%s/", ctName),
 		},
 		Image: imageName,
   }
+  networkConfig := network.NetworkingConfig{}
 
-
-	// Create container
-	resp, err := cli.ContainerCreate(ctx, &containerConfig, nil, nil, nil, ctName)
-	if err != nil {
-		log.Println("Error creating container,", err)
-		return err
-	}
 
   if isolate == true {
-    resp, err := cli.NetworkCreate(ctx, ctName, types.NetworkCreate{})
+    _, err := cli.NetworkCreate(ctx, ctName, types.NetworkCreate{})
 	  if err != nil {
 	  	log.Println("Error creating container network,", err)
 	  	return err
 	  }
+    networkConfig.EndpointsConfig = make(map[string]*network.EndpointSettings)
+    cli.NetworkConnect(ctx, ctName, ctName, nil)
 
-    err = cli.NetworkDisconnect(ctx, "bridge", resp.ID, true)
-	  if err != nil {
-	  	log.Println("Error detatching container from default network,", err)
-	  	return err
-	  }
-
-    err = cli.NetworkConnect(ctx, resp.ID, ctName, &network.EndpointSettings{})
-	  if err != nil {
-	  	log.Println("Error connecting container to network,", err)
-      DeleteContainer(ctName)
-	  	return err
-	  }
   }
+
+	// Create container
+	resp, err := cli.ContainerCreate(ctx, &containerConfig, nil, &networkConfig, nil, ctName)
+	if err != nil {
+		log.Println("Error creating container,", err)
+		return err
+	}
+  log.Println(containerConfig, networkConfig)
+
 	// Start container
 	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		log.Println("Error creating container,", err)

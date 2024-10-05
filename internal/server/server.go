@@ -18,12 +18,21 @@ import (
 func NewServer() *http.Server {
   address := fmt.Sprintf("%s:%d", viper.GetString("web.host"), viper.GetInt("web.port"))
   log.Println("Listening on", address)
+  var middlewareStack middlewares.Middleware
 
-	middlewareStack := middlewares.CreateStack(
-		middlewares.AssetCaching,
-		middlewares.GorillaLogging,
-		handlers.RecoveryHandler(),
-	)
+  if viper.GetBool("web.loghttp") {
+	  middlewareStack = middlewares.CreateStack(
+	  	middlewares.AssetCaching,
+	  	middlewares.GorillaLogging,
+	  	handlers.RecoveryHandler(),
+	  )
+  } else {
+  	middlewareStack = middlewares.CreateStack(
+  		middlewares.AssetCaching,
+  		handlers.RecoveryHandler(),
+  	)   
+  }
+
 
 	// Declare Server config
 	server := &http.Server{

@@ -28,7 +28,6 @@ func ReadConfigFile(configFile string) {
 		viper.WriteConfigAs("./config.toml")
 	}
 	log.Println("done reading config", viper.ConfigFileUsed())
-  log.Println(viper.AllSettings())
 }
 
 func setDefaults() {
@@ -44,6 +43,7 @@ func setDefaults() {
 	viper.SetDefault("web.sessionkey", sessionKey)
   viper.SetDefault("web.blockfilebrowser", false)
   viper.SetDefault("web.adminpw", adminPW)
+  viper.SetDefault("web.loghttp", true)
 	// Containers
   viper.SetDefault("container.image", "lscr.io/linuxserver/firefox")
   viper.SetDefault("container.port", 3000)
