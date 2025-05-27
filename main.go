@@ -16,16 +16,16 @@ import (
 func main() {
 	var err error
 
-  // Read configuration
-  config.ReadConfigFile("")
+	// Read configuration
+	config.ReadConfigFile("")
 
 	// Start background job to fetch container image
-	go containers.PullContainer(viper.GetString("container.image"))
+	go containers.PullContainer(viper.GetString("container.image"), true)
 
-  go containers.StartCleanup(viper.GetInt64("container.maxage"), 600)
+	go containers.StartCleanup(viper.GetInt64("container.maxage"), 600)
 
-  //Setup Session store etc
-  session.InitSessions()
+	//Setup Session store etc
+	session.InitSessions()
 
 	server := server.NewServer()
 

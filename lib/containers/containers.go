@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
@@ -17,7 +16,7 @@ import (
 )
 
 // PullContainer() pulls the container image
-func PullContainer(dockerImage string) error {
+func PullContainer(dockerImage string, verbose bool) error {
 	log.Println("pulling container image")
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -29,30 +28,32 @@ func PullContainer(dockerImage string) error {
 
 	var imageName string
 	if dockerImage != "" {
-		imageName = dockerImage 
+		imageName = dockerImage
 	} else {
 
-    imageName = "lscr.io/linuxserver/webtop:alpine-icewm"
+		imageName = "lscr.io/linuxserver/webtop:alpine-icewm"
 	}
 
+  iobuf := new(strings.Builder)
 	out, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
 	if err != nil {
 		log.Println("Error pulling Docker image:", err)
 		return err
 	}
-  _, err = io.ReadAll(out)
-  if err != nil {
-    log.Println(err)
+  if verbose {
+    io.Copy(os.Stderr, out)
+  } else {
+  io.Copy(iobuf, out)
   }
-	defer out.Close()
+	out.Close()
 
 	log.Println("Done pulling container image")
 	return nil
 }
 
 // ListContainers() gets a list of all docker containers with the "dtsrv-"-Prefix
-func ListContainers() ([]types.Container, error) {
-	var returnList []types.Container
+func ListContainers() ([]container.Summary, error) {
+	var returnList []container.Summary
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -85,10 +86,10 @@ func ListContainers() ([]types.Container, error) {
 
 // GetContainer() wraps ListContainers with a filter for the container name, because for reasons ContainerList and ContainerInspect
 // give different types representing the same thing
-func GetContainer(ctName string) (types.Container, error) {
+func GetContainer(ctName string) (container.Summary, error) {
 	containerList, err := ListContainers()
 	if err != nil {
-		return types.Container{}, err
+		return container.Summary{}, err
 	}
 	for _, ct := range containerList {
 		if ct.Names[0] == fmt.Sprintf("/%s", ctName) {
@@ -96,7 +97,7 @@ func GetContainer(ctName string) (types.Container, error) {
 		}
 	}
 	log.Println("Could not find container", ctName)
-	return types.Container{}, fmt.Errorf("Could not find container %s", ctName)
+	return container.Summary{}, fmt.Errorf("Could not find container %s", ctName)
 }
 
 // StopContainer() tries to stop a docker container

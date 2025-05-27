@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"slices"
 
 	"github.com/gorilla/sessions"
 	"github.com/jmbit/dtsrv/internal/utils"
@@ -25,21 +26,21 @@ func sessionStore() sessions.FilesystemStore {
 	if viper.GetString("web.sessionkey") != "" {
 		key = []byte(viper.GetString("web.sessionkey"))
 	} else {
-    log.Println("Generating new session key")
-    keystring, err := utils.RandomString(32)
-    if err != nil {
-      log.Fatal(err)
-    }
-    key = []byte(keystring)
+		log.Println("Generating new session key")
+		keystring, err := utils.RandomString(32)
+		if err != nil {
+			log.Fatal(err)
+		}
+		key = []byte(keystring)
 	}
-  if _, err := os.Stat(viper.GetString("web.sessionpath")); err != nil {
-    err := os.MkdirAll(viper.GetString("web.sessionpath"), os.ModePerm)
-    if err != nil {
-      log.Println("Error creating directory for sessions:", err)
-      panic(1)
-    }
-  }
-  log.Println("Sessions stored in ", viper.GetString("web.sessionpath"))
+	if _, err := os.Stat(viper.GetString("web.sessionpath")); err != nil {
+		err := os.MkdirAll(viper.GetString("web.sessionpath"), os.ModePerm)
+		if err != nil {
+			log.Println("Error creating directory for sessions:", err)
+			panic(1)
+		}
+	}
+	log.Println("Sessions stored in ", viper.GetString("web.sessionpath"))
 	return *sessions.NewFilesystemStore(viper.GetString("web.sessionpath"), key)
 }
 
@@ -119,15 +120,12 @@ func OwnsContainer(s *sessions.Session, ctName string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	for _, ct := range containerList {
-		if ct == ctName {
-			return true, nil
-		}
+	if slices.Contains(containerList, ctName) {
+		return true, nil
 	}
 
 	return false, nil
 }
-
 
 // IsAdmin() checks if the session is logged in as Admin
 func IsAdmin(s *sessions.Session) (bool, error) {
@@ -136,6 +134,13 @@ func IsAdmin(s *sessions.Session) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func GetSimpleContainer(s *sessions.Session) string {
+	if ct, ok := s.Values["simplecontainer"].(string); ok {
+		return ct
+	}
+	return ""
 }
 
 // serializeToJSON() turns a slice to a JSON string

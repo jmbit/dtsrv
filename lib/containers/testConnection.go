@@ -19,14 +19,14 @@ func TestConnectionToContainer(ctName string, port int) (bool, error) {
 	timeoutCounter := getTimeoutCount(ctName)
 	cturl, err := GetContainerUrl(ctName, port)
 	if err != nil {
-    log.Println("Error getting URL for Container", ctName)
+		log.Println("Error getting URL for Container", ctName)
 		return false, err
 	}
 
 	log.Printf("Trying to connect to %s (%s)\n", ctName, cturl)
 	resp, err := http.Get(cturl)
 	if err != nil {
-    log.Println("Error getting response from", ctName)
+		log.Println("Error getting response from", ctName)
 		return false, err
 	}
 	log.Println("Code", resp.Status, err)

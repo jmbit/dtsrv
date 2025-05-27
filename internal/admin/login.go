@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Login(w http.ResponseWriter, r *http.Request) (bool, error){
+func Login(w http.ResponseWriter, r *http.Request) (bool, error) {
 	if r.Method == http.MethodPost {
 		sess, err := session.SessionStore.Get(r, "dtsrv-session")
 		if err != nil {
@@ -25,10 +25,10 @@ func Login(w http.ResponseWriter, r *http.Request) (bool, error){
 			if err != nil {
 				return false, err
 			}
-      log.Printf("successful admin login from %s\n", r.RemoteAddr)
+			log.Printf("successful admin login from %s\n", r.RemoteAddr)
 			return true, nil
 		}
-	} 
-  log.Printf("failed admin login from %s\n", r.RemoteAddr)
-  return false, nil
+	}
+	log.Printf("failed admin login from %s\n", r.RemoteAddr)
+	return false, nil
 }

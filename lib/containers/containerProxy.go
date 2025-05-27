@@ -6,7 +6,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
-// GetContainerUrl finds the IP and port a container listens on 
+// GetContainerUrl finds the IP and port a container listens on
 // set port to 0 to use autodetect
 func GetContainerUrl(ctName string, containerPort int) (string, error) {
 	var port int

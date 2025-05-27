@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
@@ -38,25 +37,24 @@ func createContainer(ctName string, dockerImage string, isolate bool) error {
 		imageName = "lscr.io/linuxserver/webtop"
 	}
 
-  containerConfig := container.Config{
+	containerConfig := container.Config{
 		Env: []string{
 			fmt.Sprintf("SUBFOLDER=/view/%s/", ctName),
 		},
 		Image: imageName,
-  }
-  networkConfig := network.NetworkingConfig{}
+	}
+	networkConfig := network.NetworkingConfig{}
 
+	if isolate == true {
+		_, err := cli.NetworkCreate(ctx, ctName, network.CreateOptions{})
+		if err != nil {
+			log.Println("Error creating container network,", err)
+			return err
+		}
+		networkConfig.EndpointsConfig = make(map[string]*network.EndpointSettings)
+		cli.NetworkConnect(ctx, ctName, ctName, nil)
 
-  if isolate == true {
-    _, err := cli.NetworkCreate(ctx, ctName, types.NetworkCreate{})
-	  if err != nil {
-	  	log.Println("Error creating container network,", err)
-	  	return err
-	  }
-    networkConfig.EndpointsConfig = make(map[string]*network.EndpointSettings)
-    cli.NetworkConnect(ctx, ctName, ctName, nil)
-
-  }
+	}
 
 	// Create container
 	resp, err := cli.ContainerCreate(ctx, &containerConfig, nil, &networkConfig, nil, ctName)
@@ -64,7 +62,7 @@ func createContainer(ctName string, dockerImage string, isolate bool) error {
 		log.Println("Error creating container,", err)
 		return err
 	}
-  log.Println(containerConfig, networkConfig)
+	log.Println(containerConfig, networkConfig)
 
 	// Start container
 	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
@@ -74,4 +72,3 @@ func createContainer(ctName string, dockerImage string, isolate bool) error {
 	fmt.Println(ctName, resp.ID)
 	return nil
 }
-

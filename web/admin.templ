@@ -1,13 +1,13 @@
 package web
 
 import (
-	"github.com/docker/docker/api/types"
   "fmt"
   "time"
   "strings"
+	"github.com/docker/docker/api/types/container"
 )
 
-templ Admin(imageName string, cts []types.Container) {
+templ Admin(imageName string, cts []container.Summary) {
   @Base("Admin") {
     <p>Using Docker image {imageName}</p>
     <a class="button" href="/admin?action=logout">Logout</a>
@@ -35,7 +35,7 @@ templ Admin(imageName string, cts []types.Container) {
   }
 }
 
-templ adminContainerRow(ct types.Container) {
+templ adminContainerRow(ct container.Summary) {
   <tr>
     <td>
       <a href={templ.URL(fmt.Sprintf("/view%s/", ct.Names[0]))}>

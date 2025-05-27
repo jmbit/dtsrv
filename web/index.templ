@@ -1,14 +1,15 @@
 package web
 
+import "github.com/docker/docker/api/types/container"
+
 import (
-	"github.com/docker/docker/api/types"
   "fmt"
   "strings"
 	"time"
   )
 
 
-templ Index(cts []types.Container) {
+templ Index(cts []container.Summary) {
   @Base("Home") {
     <h1>dtsrv</h1>
     <div hx-target="this" hx-swap="outerHTML">
@@ -58,7 +59,7 @@ templ StartSpinner(uuid string) {
   </div>
 }
 
-templ indexContainerRow(ct types.Container) {
+templ indexContainerRow(ct container.Summary) {
   <tr>
     <td>
       <a href={templ.URL(fmt.Sprintf("/view%s/", ct.Names[0]))}>

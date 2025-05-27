@@ -26,16 +26,16 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-    if authorized == false {
-		component := AdminLogin()
-		err := component.Render(r.Context(), w)
-		  if err != nil {
-		  	http.Error(w, err.Error(), http.StatusBadRequest)
-		  	log.Fatalf("Error rendering in AdminWebHandler: %e", err)
-        return
-		  }
-    return
-    }
+		if authorized == false {
+			component := AdminLogin()
+			err := component.Render(r.Context(), w)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				log.Fatalf("Error rendering in AdminWebHandler: %e", err)
+				return
+			}
+			return
+		}
 	}
 
 	// handle queries with url parameters (always include action in this case)
@@ -62,16 +62,16 @@ func AdminWebHandler(w http.ResponseWriter, r *http.Request) {
 
 // adminLoginHandler() takes care of login
 func adminLoginHandler(w http.ResponseWriter, r *http.Request) (bool, error) {
-  authorized, err := admin.Login(w, r)
-  if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-    return false, err
-  }
-  if authorized == true  {
-    return true, nil
-  }
+	authorized, err := admin.Login(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false, err
+	}
+	if authorized == true {
+		return true, nil
+	}
 	if r.Method == http.MethodPost {
-	  sess, err := session.SessionStore.Get(r, "dtsrv-session")
+		sess, err := session.SessionStore.Get(r, "dtsrv-session")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return false, err
@@ -101,7 +101,7 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Query().Get("action") != "" {
 		// log out user
 		if r.URL.Query().Get("action") == "logout" {
-	    sess, err := session.SessionStore.Get(r, "dtsrv-session")
+			sess, err := session.SessionStore.Get(r, "dtsrv-session")
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return err
@@ -116,10 +116,10 @@ func adminQueryHandler(w http.ResponseWriter, r *http.Request) error {
 
 			return nil
 		}
-    if r.URL.Query().Get("action") == "reload" {
-      config.ReadConfigFile("")
-      return nil
-    }
+		if r.URL.Query().Get("action") == "reload" {
+			config.ReadConfigFile("")
+			return nil
+		}
 
 		// anything else from here on works on containers, so check if there is one in the query
 		ctName := r.URL.Query().Get("ctName")

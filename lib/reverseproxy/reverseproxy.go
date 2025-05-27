@@ -1,8 +1,8 @@
 package reverseproxy
 
 import (
-	"github.com/jmbit/dtsrv/lib/containers"
 	"fmt"
+	"github.com/jmbit/dtsrv/lib/containers"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -18,16 +18,18 @@ var containerProxies sync.Map
 var lastAccessed sync.Map
 
 // newProxy generates a new reverse proxy for a given URL and returns a pointer to it
-func newProxy(rawUrl string) (*httputil.ReverseProxy, error) {
+func newProxy(rawUrl string, ctname string) (*httputil.ReverseProxy, error) {
 	url, err := url.Parse(rawUrl)
 	if err != nil {
 		return nil, err
 	}
+  prefix := fmt.Sprintf("/view/%s", ctname)
 	proxy := &httputil.ReverseProxy{
-		//This is technically default behaviour, but explicitly written out for clarity
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(url)
 			r.Out.Host = r.In.Host
+      // remove per-container prefix
+      r.Out.URL.Path = strings.TrimPrefix(r.In.URL.Path, prefix)
 		},
 	}
 	log.Println("created Proxy for ", rawUrl)
@@ -43,7 +45,7 @@ func NewContainerProxy(ctName string, url string) error {
 		log.Println("Proxy for Container", ctName, "already exists")
 		return nil
 	}
-	proxy, err := newProxy(url)
+	proxy, err := newProxy(url, ctName)
 	if err != nil {
 		return err
 	}
